@@ -6,6 +6,7 @@ public class MenuPanelsController : PanelController
     public GameObject RulesPanel;
     public GameObject StatsPanel;
     public GameObject SettingsPanel;
+    public GameObject MatchSettingsPanel;
     
     public void Start()
     {
@@ -26,6 +27,11 @@ public class MenuPanelsController : PanelController
     public void OpenSettingsPanel()
     {
         GoInPanel(SettingsPanel);
+    }
+    
+    public void OpenMatchSettingsPanel()
+    {
+        GoInPanel(MatchSettingsPanel);
     }
     
     public void ExitGame()

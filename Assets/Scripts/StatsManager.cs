@@ -4,9 +4,9 @@ using UnityEngine;
 [System.Serializable]
 public class StatsData
 {
-    public int matches;
-    public int wins;
-    public int loses;
+    public int winsOnEasy;
+    public int winsOnHard;
+    public int losses;
     public int income;
     public int expenses;
     public int maxBudget;
@@ -15,45 +15,59 @@ public class StatsData
 
 public class StatsManager : MonoBehaviour
 {
-    private string filePath;
     public StatsData stats;
+    private string filePath;
 
     private void Awake()
     {
         filePath = Path.Combine(Application.persistentDataPath, "stats.json");
-
         LoadStats();
     }
 
     public void LoadStats()
     {
-        if (File.Exists(filePath))
+        if (!File.Exists(filePath))
         {
-            string json = File.ReadAllText(filePath);
-            stats = JsonUtility.FromJson<StatsData>(json);
-            Debug.Log("Статистика завантажена");
-        }
-        else
-        {
-            stats = new StatsData(); 
+            stats = new StatsData();
             SaveStats();
-            Debug.Log("Створено нову статистику");
+            return;
         }
+
+        string json = File.ReadAllText(filePath);
+        stats = JsonUtility.FromJson<StatsData>(json);
     }
 
     public void SaveStats()
     {
         string json = JsonUtility.ToJson(stats, true);
         File.WriteAllText(filePath, json);
-        Debug.Log("Статистика збережена");
     }
 
-    public void AddMatch(bool win)
+    public int GetStat(string key)
     {
-        stats.matches++;
+        return key switch
+        {
+            "winsOnEasy" => stats.winsOnEasy,
+            "winsOnHard" => stats.winsOnHard,
+            "losses" => stats.losses,
+            "income" => stats.income,
+            "expenses" => stats.expenses,
+            "maxBudget" => stats.maxBudget,
+            _ => 0
+        };
+    }
 
-        if (win) stats.wins++;
-        else stats.loses++;
+    public void AddToStat(string key, int amount)
+    {
+        switch (key)
+        {
+            case "winsOnEasy": stats.winsOnEasy += amount; break;
+            case "winsOnHard": stats.winsOnHard += amount; break;
+            case "losses": stats.losses += amount; break;
+            case "income": stats.income += amount; break;
+            case "expenses": stats.expenses += amount; break;
+            case "maxBudget": stats.maxBudget += amount; break;
+        }
 
         SaveStats();
     }
