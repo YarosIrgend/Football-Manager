@@ -4847,7 +4847,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &633023737
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4922,6 +4922,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ddc1c7339795446469e42119457e7508, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MatchSettingsController
+  difficulty: 0
+  playerCount: 2
+  chipColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!1 &708709532
 GameObject:
   m_ObjectHideFlags: 0
@@ -7634,7 +7637,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1111511960
 RectTransform:
   m_ObjectHideFlags: 0
@@ -10400,6 +10403,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ddc1c7339795446469e42119457e7508, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MatchSettingsController
+  difficulty: 0
+  playerCount: 2
+  chipColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!1 &1448141465
 GameObject:
   m_ObjectHideFlags: 0
