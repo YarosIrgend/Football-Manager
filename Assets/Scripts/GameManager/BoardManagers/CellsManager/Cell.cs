@@ -6,4 +6,5 @@ public class Cell : MonoBehaviour
     public string cellName;
     public CellType type;
     public Transform[] snapPoints;
+
 }
