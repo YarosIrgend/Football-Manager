@@ -1,33 +1,46 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public enum Difficulty { Easy, Hard }
-
 public class MatchSettingsController : MonoBehaviour
 {
-    public Difficulty difficulty = Difficulty.Easy;
-    public byte playerCount = 2;
-    public Color chipColor = Color.red;
+    public GameSettings GameSettings;
+
+    public void Start()
+    {
+        GameSettings.Difficulty = Difficulty.Easy;
+        GameSettings.PlayerCount = 2;
+        GameSettings.ChipColor = Color.red;
+    }
     
     public void StartMatch()
     {
         SceneManager.LoadScene("Game");
     }
     
-    // public void OnDifficultyChanged(int index)
-    // {
-    //     gameSettings.difficulty = index == 0 ?
-    //         GameSettings.Difficulty.Easy :
-    //         GameSettings.Difficulty.Hard;
-    // }
-    //
-    // public void OnPlayerCountChanged(int index)
-    // {
-    //     gameSettings.playerCount = index + 2; // 0->2, 1->3, 2->4
-    // }
-    //
-    // public void OnColorSelected(Color color)
-    // {
-    //     gameSettings.chipColor = color;
-    // }
+    public void OnDifficultyChanged(int index)
+    {
+        GameSettings.Difficulty = index == 0 ?
+            Difficulty.Easy :
+            Difficulty.Hard;
+        Debug.Log(GameSettings.Difficulty);
+    }
+    
+    public void OnPlayerCountChanged(int index)
+    {
+        GameSettings.PlayerCount = (byte)(index + 2); // 0->2, 1->3, 2->4
+        Debug.Log(GameSettings.PlayerCount);
+    }
+    
+    public void OnColorSelected(int index)
+    {
+        GameSettings.ChipColor = index switch
+        {
+            1 => Color.red,
+            2 => Color.blue,
+            3 => Color.green,
+            4 => Color.yellow,
+            _ => Color.white
+        };
+        Debug.Log(GameSettings.ChipColor);
+    }
 }

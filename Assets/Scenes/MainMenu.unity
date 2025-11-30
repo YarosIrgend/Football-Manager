@@ -679,8 +679,7 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1419979692}
+  m_Children: []
   m_Father: {fileID: 1872136200}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -3267,6 +3266,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1265773693}
+  - {fileID: 1226865230}
   m_Father: {fileID: 394838421}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -4847,7 +4847,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &633023737
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4922,9 +4922,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ddc1c7339795446469e42119457e7508, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MatchSettingsController
-  difficulty: 0
-  playerCount: 2
-  chipColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!1 &708709532
 GameObject:
   m_ObjectHideFlags: 0
@@ -5928,7 +5925,7 @@ GameObject:
   - component: {fileID: 808905393}
   - component: {fileID: 808905392}
   m_Layer: 5
-  m_Name: Dropdown
+  m_Name: Count_Dropdown
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5941,18 +5938,18 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 808905390}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 500200558}
   - {fileID: 1389328627}
-  m_Father: {fileID: 1677123900}
+  m_Father: {fileID: 1255607648}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 360, y: -4.416}
+  m_AnchoredPosition: {x: 199, y: -4.416}
   m_SizeDelta: {x: 183.5518, y: 58.832}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &808905392
@@ -7637,7 +7634,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1111511960
 RectTransform:
   m_ObjectHideFlags: 0
@@ -8375,7 +8372,7 @@ GameObject:
   - component: {fileID: 1226865232}
   - component: {fileID: 1226865231}
   m_Layer: 5
-  m_Name: Dropdown
+  m_Name: Color_Dropdown
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8388,18 +8385,18 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1226865229}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1793916833}
   - {fileID: 1347429173}
-  m_Father: {fileID: 1265773693}
+  m_Father: {fileID: 443219878}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 360, y: -4.416}
+  m_AnchoredPosition: {x: 199, y: -4.416}
   m_SizeDelta: {x: 183.5518, y: 58.832}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1226865231
@@ -8811,6 +8808,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1677123900}
+  - {fileID: 808905391}
   m_Father: {fileID: 394838421}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -8847,8 +8845,7 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1226865230}
+  m_Children: []
   m_Father: {fileID: 443219878}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -10100,7 +10097,7 @@ GameObject:
   - component: {fileID: 1419979694}
   - component: {fileID: 1419979693}
   m_Layer: 5
-  m_Name: Dropdown
+  m_Name: Difficulty_Dropdown
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10113,18 +10110,18 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1419979691}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1563732564}
   - {fileID: 1575361089}
-  m_Father: {fileID: 38774293}
+  m_Father: {fileID: 1872136200}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 360, y: -4.416}
+  m_AnchoredPosition: {x: 199, y: -4.416}
   m_SizeDelta: {x: 183.5518, y: 58.832}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1419979693
@@ -10186,7 +10183,19 @@ MonoBehaviour:
       m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 633023740}
+        m_TargetAssemblyTypeName: MatchSettingsController, Assembly-CSharp
+        m_MethodName: OnDifficultyChanged
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_AlphaFadeSpeed: 0.15
 --- !u!114 &1419979694
 MonoBehaviour:
@@ -10403,9 +10412,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ddc1c7339795446469e42119457e7508, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MatchSettingsController
-  difficulty: 0
-  playerCount: 2
-  chipColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!1 &1448141465
 GameObject:
   m_ObjectHideFlags: 0
@@ -12155,8 +12161,7 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 808905391}
+  m_Children: []
   m_Father: {fileID: 1255607648}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -13519,6 +13524,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 38774293}
+  - {fileID: 1419979692}
   m_Father: {fileID: 394838421}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
