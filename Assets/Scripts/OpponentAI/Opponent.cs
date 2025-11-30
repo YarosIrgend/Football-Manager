@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Opponent : MonoBehaviour
+public class Opponent
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()

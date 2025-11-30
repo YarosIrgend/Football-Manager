@@ -1,7 +1,5 @@
-﻿using UnityEngine;
-
-public class Banknote : MonoBehaviour
+﻿public class Banknote
 {
-    public string banknoteImagePath;
-    public int value;
+    public string BanknoteImagePath;
+    public int Value;
 }
