@@ -6,7 +6,9 @@ public class Player
 {
     public List<Club> Clubs;
     public List<Telecompany> Telecompanies;
-    public Chip chip;
+    public Color ChipColor;   
+    
+    public Chip ChipBehaviour; // Ссилка на реальну фішку на сцені
     public Dictionary<Banknote, int> Money; 
     public Opponent opponent;
 
@@ -15,6 +17,10 @@ public class Player
         get
         {
             return Money.Sum(banknoteGroup => banknoteGroup.Key.Value * banknoteGroup.Value);
+        }
+        set
+        {
+            
         }
     }
 }
