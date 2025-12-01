@@ -1,27 +1,29 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class Game : MonoBehaviour
 {
-    public Board Board;
+    private BoardManager boardManager;
 
-    [Header("Chip Prefabs")]
+    [Header("Chip Prefabs")] 
     public GameObject BlueChipPrefab;
     public GameObject RedChipPrefab;
     public GameObject GreenChipPrefab;
     public GameObject YellowChipPrefab;
 
-    [HideInInspector]
-    public GameSettings GameSettings;
+    [HideInInspector] public GameSettings GameSettings;
 
-    [HideInInspector]
-    public List<Player> Players = new();
+    [HideInInspector] public List<Player> Players = new();
 
+    [Obsolete("Obsolete")]
     private void Start()
     {
-        GameSettings = MatchSettingsController.GameSettings;
-        Debug.Log($"{GameSettings.PlayerCount}, {GameSettings.ChipColor}, {GameSettings.Difficulty}");
+        //GameSettings = MatchSettingsController.GameSettings;
+        GameSettings = new() { Difficulty = Difficulty.Easy, PlayerCount = 4, ChipColor = Color.blue };
+        boardManager = FindObjectOfType<BoardManager>();
         InitializePlayers();
         SetChips();
     }
@@ -50,8 +52,8 @@ public class Game : MonoBehaviour
                 // Противник
                 player.ChipColor = SetColorRandomlyExclusively();
                 player.opponent = GameSettings.Difficulty == Difficulty.Easy
-                                    ? new EasyOpponent()
-                                    : new HardOpponent();
+                    ? new EasyOpponent()
+                    : new HardOpponent();
             }
 
             Players.Add(player);
@@ -123,7 +125,7 @@ public class Game : MonoBehaviour
             player.ChipBehaviour = chip;
 
             // Ставимо на стартову клітинку
-            PlaceChipOnCell(chip, Board.cells[0]);
+            PlaceChipOnCell(chip, boardManager.Board.cells[0]);
         }
     }
 
@@ -139,13 +141,13 @@ public class Game : MonoBehaviour
     private void PlaceChipOnCell(Chip chip, Cell cell)
     {
         SnapPoint sp = cell.GetFreeSnapPoint();
-        
+
         sp.IsBusy = true;
         chip.CurrentCell = cell;
         chip.CurrentSnapPoint = sp.Point;
 
         chip.transform.position = sp.Point.position;
-        chip.transform.localScale = Vector3.one * 20; 
+        chip.transform.localScale = Vector3.one * 20;
         Debug.Log(chip.transform.position);
     }
 
