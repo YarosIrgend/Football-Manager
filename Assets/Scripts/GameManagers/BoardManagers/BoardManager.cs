@@ -4,11 +4,12 @@ public class BoardManager : MonoBehaviour
 {
     public Board Board;
 
-    private void Start()
-    {
-        GenerateSnapPoints();
-    }
-
+    [Header("Chip Prefabs")] 
+    public GameObject BlueChipPrefab;
+    public GameObject GreenChipPrefab;
+    public GameObject RedChipPrefab;
+    public GameObject YellowChipPrefab;
+    
     public void GenerateSnapPoints()
     {
         float radius = 0.25f;
@@ -36,4 +37,58 @@ public class BoardManager : MonoBehaviour
             }
         }
     }
+    
+    
+    
+    #region Chips
+
+    public void PlaceChipOnCell(Chip chip, Cell cell)
+    {
+        SnapPoint sp = cell.GetFreeSnapPoint();
+
+        sp.IsBusy = true;
+        chip.CurrentCell = cell;
+        chip.CurrentSnapPoint = sp.Point;
+
+        chip.transform.position = sp.Point.position;
+        chip.transform.localScale = Vector3.one * 20;
+        Debug.Log(chip.transform.position);
+    }
+    
+    public void SetChips(Game game)
+    {
+        foreach (var player in game.Players)
+        {
+            GameObject prefab = GetPrefabForColor(player.ChipColor);
+            if (prefab == null)
+            {
+                Debug.LogError("Prefab for color " + player.ChipColor + " is null!");
+                continue;
+            }
+
+            GameObject chipGo = Object.Instantiate(prefab);
+
+            // Додаємо компонент Chip, якщо його немає на префабі
+            Chip chip = chipGo.GetComponent<Chip>();
+            if (chip == null)
+                chip = chipGo.AddComponent<Chip>();
+
+            chip.Color = player.ChipColor;
+            player.ChipBehaviour = chip;
+
+            // Ставимо на стартову клітинку
+            PlaceChipOnCell(chip, Board.cells[0]);
+        }
+    }
+
+    private GameObject GetPrefabForColor(Color color)
+    {
+        if (color == Color.blue) return BlueChipPrefab;
+        if (color == Color.red) return RedChipPrefab;
+        if (color == Color.green) return GreenChipPrefab;
+        if (color == Color.yellow) return YellowChipPrefab;
+        return null;
+    }
+    
+    #endregion
 }
