@@ -52,7 +52,6 @@ public class BoardManager : MonoBehaviour
 
         chip.transform.position = sp.Point.position;
         chip.transform.localScale = Vector3.one * 20;
-        Debug.Log(chip.transform.position);
     }
     
     public void SetChips(Game game)
@@ -60,13 +59,8 @@ public class BoardManager : MonoBehaviour
         foreach (var player in game.Players)
         {
             GameObject prefab = GetPrefabForColor(player.ChipColor);
-            if (prefab == null)
-            {
-                Debug.LogError("Prefab for color " + player.ChipColor + " is null!");
-                continue;
-            }
 
-            GameObject chipGo = Object.Instantiate(prefab);
+            GameObject chipGo = Instantiate(prefab);
 
             // Додаємо компонент Chip, якщо його немає на префабі
             Chip chip = chipGo.GetComponent<Chip>();

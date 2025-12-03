@@ -7,6 +7,7 @@ public class GameManager : MonoBehaviour
 {
     public Game Game;
     public BoardManager boardManager;
+    public PropertyManager propertyManager;
     
     private void Start()
     {
@@ -14,6 +15,7 @@ public class GameManager : MonoBehaviour
         Game.GameSettings = new GameSettings { Difficulty = Difficulty.Easy, PlayerCount = 4, ChipColor = Color.blue };
         boardManager.GenerateSnapPoints();
         InitializeGame();
+        propertyManager.SetPlayers(Game.Players);
     }
 
     private void InitializeGame()
