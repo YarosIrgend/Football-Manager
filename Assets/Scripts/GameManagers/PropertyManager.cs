@@ -1,15 +1,18 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 public class PropertyManager : MonoBehaviour
 {
     private List<Player> players;
 
-    [Header("Prefabs")] public GameObject propertyPlanePrefab; // 3D-plane кнопка
+    [Header("Prefabs")] 
+    public GameObject propertyPlanePrefab; // 3D-plane кнопка
     public GameObject propertyPanelPrefab; // Canvas панель
-
-    [Header("Settings")] public Transform boardCenter; // Центр ігрового поля
-    public float distanceFromBoard = 12f; // Радіус розташування кнопок
+    public PropertyPanelController PropertyPanelController;
+    
+    [Header("Settings")] 
+    public Transform boardCenter; // Центр ігрового поля
 
     private Dictionary<Player, GameObject> panels = new();
     private Dictionary<Player, GameObject> planes = new();
@@ -17,6 +20,7 @@ public class PropertyManager : MonoBehaviour
     public void SetPlayers(List<Player> players)
     {
         this.players = players;
+        Debug.Log(players.Count);
         InitializePropertyPanels();
     }
 
@@ -33,37 +37,37 @@ public class PropertyManager : MonoBehaviour
             plane.transform.LookAt(boardCenter.position);
             plane.SetActive(true);
             
-            var e = plane.transform.eulerAngles;
-            
             switch (i)
             {
                 case 0:
-                    plane.transform.localPosition = new Vector3(-3.1f, 0, -18);
+                    plane.transform.localPosition = new Vector3(0f, 0, -40.6f);
                     plane.transform.rotation = Quaternion.Euler(0, 180, 0);
                     break;
                 case 1:
-                    plane.transform.localPosition = new Vector3(-3.1f, 0, 63);
+                    plane.transform.localPosition = new Vector3(0f, 0, 40.6f);
                     plane.transform.rotation = Quaternion.Euler(0, 0, 0);
                     break;
                 case 2:
-                    plane.transform.localPosition = new Vector3(-66.1f, 1, 21.6f);
+                    plane.transform.localPosition = new Vector3(-63.5f, 0, 0f);
                     plane.transform.rotation = Quaternion.Euler(0, 270, 0);
                     break;
                 default:
-                    plane.transform.localPosition = new Vector3(60f, 1, 21.6f);
+                    plane.transform.localPosition = new Vector3(63.5f, 0, 0f);
                     plane.transform.rotation = Quaternion.Euler(0, 90, 0);
                     break;
             }
 
             planes[p] = plane;
 
+            
             // Додаємо скрипт клика
             var clickable = plane.AddComponent<PropertyClickable>();
             clickable.Init(p, this);
-
+            
             // 2. Створюємо UI панель
-            GameObject panel = Instantiate(propertyPanelPrefab, transform);
-            panel.transform.LookAt(boardCenter.position);
+            var canvas = transform.parent.GetComponentInChildren<Canvas>();
+            GameObject panel = Instantiate(propertyPanelPrefab, canvas.transform);
+            panel.transform.LookAt(propertyPanelPrefab.transform);
             panel.name = $"PropertyPanel_Player{i}";
             panel.SetActive(false);
             panels[p] = panel;
@@ -73,11 +77,24 @@ public class PropertyManager : MonoBehaviour
     public void ShowPropertyPanel(Player player)
     {
         // Закриваємо всі
+        HideAllPanels();
+        Debug.Log($"{player.MoneySum}");
+        panels[player].SetActive(true);
+        if (PropertyPanelController == null)
+        {
+            Debug.LogError("PropertyPanelController is null");
+        }
+
+        if (PropertyPanelController.MoneyPanelController == null)
+        {
+            Debug.LogError("MoneyPanelController is null");
+        }
+        PropertyPanelController.MoneyPanelController.ShowMoney(player);
+    }
+    
+    public void HideAllPanels()
+    {
         foreach (var panel in panels.Values)
             panel.SetActive(false);
-
-        // Відкриваємо панель цього гравця
-        panels[player].SetActive(true);
-        Debug.Log("Showing property panel");
     }
 }

@@ -85,12 +85,12 @@ public class GameManager : MonoBehaviour
     {
         return new Dictionary<Banknote, int>
         {
-            { new Banknote { BanknoteImagePath = null, Value = 100_000 }, 4 },
-            { new Banknote { BanknoteImagePath = null, Value = 200_000 }, 3 },
-            { new Banknote { BanknoteImagePath = null, Value = 500_000 }, 2 },
-            { new Banknote { BanknoteImagePath = null, Value = 1_000_000 }, 1 },
+            { new Banknote { BanknoteImagePath = null, Value = 5_000_000 }, 2 },
             { new Banknote { BanknoteImagePath = null, Value = 2_000_000 }, 1 },
-            { new Banknote { BanknoteImagePath = null, Value = 5_000_000 }, 2 }
+            { new Banknote { BanknoteImagePath = null, Value = 1_000_000 }, 1 },
+            { new Banknote { BanknoteImagePath = null, Value = 500_000 }, 2 },
+            { new Banknote { BanknoteImagePath = null, Value = 200_000 }, 3 },
+            { new Banknote { BanknoteImagePath = null, Value = 100_000 }, 4 },
         };
     }
 

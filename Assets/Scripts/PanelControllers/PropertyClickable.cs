@@ -11,9 +11,8 @@ public class PropertyClickable : MonoBehaviour
         manager = m;
     }
 
-    private void OnMouseDown()
+    public void OnMouseDown()
     {
         manager.ShowPropertyPanel(player);
-        Debug.Log("Property panel selected");
     }
 }
