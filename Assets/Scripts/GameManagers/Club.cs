@@ -1,3 +1,4 @@
+[System.Serializable]
 public class Club
 {
     public string CardImagePath;
@@ -10,4 +11,5 @@ public class Club
     public Trainer Trainer;
     public Manager Manager;
     public bool IsPlayable;
+    public bool IsMortgaged;
 }

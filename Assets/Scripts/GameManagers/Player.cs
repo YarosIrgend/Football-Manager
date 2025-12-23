@@ -2,6 +2,7 @@
 using System.Linq;
 using UnityEngine;
 
+[System.Serializable]
 public class Player
 {
     public List<Club> Clubs;
@@ -9,14 +10,14 @@ public class Player
     public Color ChipColor;   
     
     public Chip ChipBehaviour; // Ссилка на реальну фішку на сцені
-    public Dictionary<Banknote, int> Money; 
+    public List<BanknoteGroup> Money; 
     public Opponent opponent;
 
     public int MoneySum
     {
         get
         {
-            return Money.Sum(banknoteGroup => banknoteGroup.Key.Value * banknoteGroup.Value);
+            return Money.Sum(banknoteGroup => banknoteGroup.Banknote.Value * banknoteGroup.Amount);
         }
         set
         {

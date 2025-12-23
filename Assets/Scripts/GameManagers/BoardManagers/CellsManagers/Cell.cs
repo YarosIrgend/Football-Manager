@@ -12,4 +12,9 @@ public class Cell : MonoBehaviour
     {
         return snapPoints.FirstOrDefault(sp => !sp.IsBusy);
     }
+
+    public string GetCellName()
+    {
+        return cellName;
+    }
 }

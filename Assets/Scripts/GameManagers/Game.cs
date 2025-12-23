@@ -5,5 +5,7 @@ public class Game : MonoBehaviour
 {
     [HideInInspector] public GameSettings GameSettings;
 
-    [HideInInspector] public List<Player> Players = new();
+    public List<Player> Players = new();
+    
+    public List<Club> Clubs = new();
 }

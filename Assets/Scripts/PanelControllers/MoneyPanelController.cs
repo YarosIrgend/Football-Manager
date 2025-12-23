@@ -20,7 +20,7 @@ public class MoneyPanelController : MonoBehaviour
         {
             var banknoteRow = GameObject.Find(banknoteNames[i++]);
             var banknoteText = banknoteRow.transform.Find("Count").GetComponent<TextMeshProUGUI>();
-            banknoteText.text = $"x{banknote.Value.ToString()}";
+            banknoteText.text = $"x{banknote.Amount}";
         }
     }
 

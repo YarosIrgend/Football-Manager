@@ -1,18 +1,25 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
+using UnityEngine.EventSystems;
 
-public class PropertyClickable : MonoBehaviour
+public class PropertyClickable : MonoBehaviour, IPointerClickHandler
 {
     private Player player;
-    private PropertyManager manager;
-
-    public void Init(Player p, PropertyManager m)
+    private Action<Player> DoAction;
+    
+    public void Init(Player p, Action<Player> doAction)
     {
         player = p;
-        manager = m;
+        this.DoAction = doAction;
     }
 
     public void OnMouseDown()
     {
-        manager.ShowPropertyPanel(player);
+        DoAction(player);
+    }
+    
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        DoAction?.Invoke(player);
     }
 }
