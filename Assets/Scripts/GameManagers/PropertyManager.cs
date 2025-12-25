@@ -65,13 +65,8 @@ public class PropertyManager : MonoBehaviour
 
     public void ShowPropertyPanel(Player player)
     {
-        var propertiesPanel = GetObject("PropertiesPanelCanvas");
-        if (propertiesPanel == null)
-        {
-            Debug.Log("No properties panel found");
-        }
-        var clubsPlane = propertiesPanel.transform.Find("PropertiesPanel/ClubsPlane").gameObject;
-        var telecompaniesPlane = propertiesPanel.transform.Find("PropertiesPanel/TelecompaniesPlane").gameObject;
+        var clubsPlane = GetObject("ClubsPlane").gameObject;
+        var telecompaniesPlane = GetObject("TelecompaniesPlane").gameObject;
 
         // видаляємо clickables з кнопок, щоб переписати їх на іншого гравця
         RemoveClickable(clubsPlane);
@@ -95,8 +90,7 @@ public class PropertyManager : MonoBehaviour
     public void HideAllPanels()
     {
         var propertyPanel = GetObject("PropertyPanel");
-        var clubsPanelCanvas = GetObject("ClubsPanelCanvas"); 
-        var clubsPanel = clubsPanelCanvas.transform.Find("ClubsPanel").gameObject;
+        var clubsPanel = GetObject("ClubsPanel").gameObject;
         
         propertyPanel.SetActive(false);
         clubsPanel.SetActive(false);

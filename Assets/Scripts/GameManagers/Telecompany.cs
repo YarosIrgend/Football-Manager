@@ -1,9 +1,8 @@
-﻿using UnityEngine;
-
+﻿[System.Serializable]
 public class Telecompany
 {
     public string TelecompanyImagePath;
     public string Name;
     public int Price;
-    public Player Player;
+    public bool IsMortgaged;
 }
