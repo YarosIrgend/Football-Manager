@@ -11,9 +11,9 @@ public class Player
     
     public Chip ChipBehaviour; // Ссилка на реальну фішку на сцені
     public List<BanknoteGroup> Money; 
-    public Opponent opponent;
+    public Opponent Opponent; // якщо Opponent == null - це наш гравець
 
-    public int MoneySum
+    public int MoneySum 
     {
         get
         {

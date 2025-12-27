@@ -1,9 +1,6 @@
 [System.Serializable]
-public class Club
+public class Club : Property
 {
-    public string CardImagePath;
-    public string Name;
-    public int Price;
     public int IncomeWithPlayer;
     public int IncomeWithTrainer;
     public int IncomeWithManager;
@@ -11,5 +8,4 @@ public class Club
     public Trainer Trainer;
     public Manager Manager;
     public bool IsPlayable;
-    public bool IsMortgaged;
 }

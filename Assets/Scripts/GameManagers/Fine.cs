@@ -1,6 +1,6 @@
 ﻿public class Fine
 {
-    public string FineImagePath;
+    public string ImagePath;
     public string Text;
     public int Value;
 }

@@ -1,8 +1,5 @@
 ﻿[System.Serializable]
-public class Telecompany
+public class Telecompany : Property
 {
-    public string TelecompanyImagePath;
-    public string Name;
-    public int Price;
-    public bool IsMortgaged;
+    
 }

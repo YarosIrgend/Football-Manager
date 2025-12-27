@@ -1,6 +1,6 @@
 ﻿public class Bonus
 {
-    public string BonusImagePath;
+    public string ImagePath;
     public string Text;
     public int Value;
 }

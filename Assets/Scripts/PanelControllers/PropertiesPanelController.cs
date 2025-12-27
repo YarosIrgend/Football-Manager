@@ -73,7 +73,7 @@ public class PropertiesPanelController : MonoBehaviour
             card.SetActive(true);
 
             var image = card.GetComponent<Image>();
-            image.sprite = Resources.Load<Sprite>(club.CardImagePath);
+            image.sprite = Resources.Load<Sprite>(club.ImagePath);
 
             var clickable = card.GetComponent<PropertyClickable>();
             clickable.Init(player, _ => ShowClubInfo(club));
@@ -89,7 +89,7 @@ public class PropertiesPanelController : MonoBehaviour
         card.name = "Image";
         card.SetActive(true);
         var image = card.GetComponent<Image>(); // зображення
-        image.sprite = Resources.Load<Sprite>(club.CardImagePath);
+        image.sprite = Resources.Load<Sprite>(club.ImagePath);
         var rt = card.GetComponent<RectTransform>(); // розмір
         rt.sizeDelta = new Vector2(400f, 400f);
 
@@ -135,7 +135,11 @@ public class PropertiesPanelController : MonoBehaviour
 
     public void ShowTelecompaniesPanel(Player player)
     {
+        // Закрити панелі
+        ClubInfoPanel.SetActive(false);
         ClubsPanel.SetActive(false);
+        var scrollView = ClubsPanel.transform.Find("Scroll View").gameObject;
+        scrollView.SetActive(false);
 
         ClubsPanel.SetActive(true);
         var textObj = ClubsPanel.transform.Find("NoClubsText").gameObject;
@@ -148,10 +152,7 @@ public class PropertiesPanelController : MonoBehaviour
             textObj.SetActive(true);
             return;
         }
-
-        ClearClubsAndTelecompanies();
-        var scrollView = ClubsPanel.transform.Find("Scroll View").gameObject;
-        scrollView.SetActive(true);
+        
         textObj.SetActive(false);
 
         ShowTelecompanies(player);
@@ -170,7 +171,7 @@ public class PropertiesPanelController : MonoBehaviour
             card.SetActive(true);
 
             var image = card.GetComponent<Image>();
-            image.sprite = Resources.Load<Sprite>(telecompany.TelecompanyImagePath);
+            image.sprite = Resources.Load<Sprite>(telecompany.ImagePath);
 
             var clickable = card.GetComponent<PropertyClickable>();
             clickable.Init(player, _ => ShowTelecompanyInfo(telecompany));
@@ -185,7 +186,7 @@ public class PropertiesPanelController : MonoBehaviour
         card.name = "Image";
         card.SetActive(true);
         var image = card.GetComponent<Image>(); // зображення
-        image.sprite = Resources.Load<Sprite>(telecompany.TelecompanyImagePath);
+        image.sprite = Resources.Load<Sprite>(telecompany.ImagePath);
         var rt = card.GetComponent<RectTransform>(); // розмір
         rt.sizeDelta = new Vector2(400f, 400f);
 
@@ -237,8 +238,8 @@ public class PropertiesPanelController : MonoBehaviour
         tmp.fontStyle = FontStyles.Bold;
         tmp.alignment = TextAlignmentOptions.Left;
 
-        // ❗ Не стискати текст
-        tmp.enableWordWrapping = false;
+        // Не стискати текст
+        tmp.textWrappingMode = TextWrappingModes.NoWrap;
         tmp.overflowMode = TextOverflowModes.Overflow;
         tmp.autoSizeTextContainer = false;
 

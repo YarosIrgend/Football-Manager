@@ -3,18 +3,13 @@ using UnityEngine;
 
 public class Cell : MonoBehaviour
 {
-    public int index;
-    public string cellName;
-    public CellType type;
-    public SnapPoint[] snapPoints;
+    public int Index; // номер клітинки на дошці
+    public string CellName;
+    public CellType Type;
+    public SnapPoint[] SnapPoints;
     
     public SnapPoint GetFreeSnapPoint()
     {
-        return snapPoints.FirstOrDefault(sp => !sp.IsBusy);
-    }
-
-    public string GetCellName()
-    {
-        return cellName;
+        return SnapPoints.FirstOrDefault(sp => !sp.IsBusy);
     }
 }

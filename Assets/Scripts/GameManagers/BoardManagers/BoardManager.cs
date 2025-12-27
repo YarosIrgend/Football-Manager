@@ -3,13 +3,15 @@
 public class BoardManager : MonoBehaviour
 {
     public Board Board;
-
+    public CellActionManager CellActionManager;
+    
     [Header("Chip Prefabs")] 
     public GameObject BlueChipPrefab;
     public GameObject GreenChipPrefab;
     public GameObject RedChipPrefab;
     public GameObject YellowChipPrefab;
     
+    // генерує точки для поставки фішок на клітинки
     public void GenerateSnapPoints()
     {
         float radius = 0.25f;
@@ -17,11 +19,11 @@ public class BoardManager : MonoBehaviour
 
         foreach (var cell in Board.cells)
         {
-            cell.snapPoints = new SnapPoint[snapCount];
+            cell.SnapPoints = new SnapPoint[snapCount];
 
             for (int i = 0; i < snapCount; i++)
             {
-                cell.snapPoints[i] = new SnapPoint();
+                cell.SnapPoints[i] = new SnapPoint();
 
                 GameObject snap = new GameObject("SnapPoint_" + i);
                 snap.transform.SetParent(cell.transform);
@@ -32,13 +34,11 @@ public class BoardManager : MonoBehaviour
 
                 snap.transform.localPosition = new Vector3(x, -0.1f, z);
 
-                cell.snapPoints[i].Point = snap.transform;
-                cell.snapPoints[i].IsBusy = false;
+                cell.SnapPoints[i].Point = snap.transform;
+                cell.SnapPoints[i].IsBusy = false;
             }
         }
     }
-    
-    
     
     #region Chips
 
@@ -61,7 +61,7 @@ public class BoardManager : MonoBehaviour
             GameObject prefab = GetPrefabForColor(player.ChipColor);
 
             GameObject chipGo = Instantiate(prefab);
-
+            
             // Додаємо компонент Chip, якщо його немає на префабі
             Chip chip = chipGo.GetComponent<Chip>();
             if (chip == null)
@@ -82,6 +82,17 @@ public class BoardManager : MonoBehaviour
         if (color == Color.green) return GreenChipPrefab;
         if (color == Color.yellow) return YellowChipPrefab;
         return null;
+    }
+    
+    public void MovePlayerChip(Chip chipBehaviour, int cellsCountToPass)
+    {
+        var newCellIndex = chipBehaviour.CurrentCell.Index + cellsCountToPass;
+        if (newCellIndex > 31)
+        {
+            newCellIndex -= 32;
+        }
+        var newCell = Board.cells[newCellIndex];
+        PlaceChipOnCell(chipBehaviour, newCell);
     }
     
     #endregion

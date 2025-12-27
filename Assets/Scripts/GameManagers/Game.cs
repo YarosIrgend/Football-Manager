@@ -8,4 +8,10 @@ public class Game : MonoBehaviour
     public List<Player> Players = new();
     
     public List<Club> Clubs = new();
+    
+    public List<Telecompany> Telecompanies = new();
+    
+    public List<Bonus> Bonuses = new();
+    
+    public List<Fine> Fines = new();
 }
