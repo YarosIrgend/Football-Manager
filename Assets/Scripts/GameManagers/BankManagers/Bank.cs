@@ -1,9 +1,16 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿// для обміну купюр
 
-[System.Serializable]
-public class Bank
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+[Serializable]
+public class Bank : MonoBehaviour
 {
+    public GameObject MoneyExchangerPanel;
+    public MoneyExchanger MoneyExchanger;
+    
     private List<Banknote> Banknotes = new()
     {
         new Banknote { Value = 5_000_000 },
@@ -24,5 +31,11 @@ public class Bank
             playerBanknoteToAdd.Amount++;
             money -= banknoteToPay.Value;
         }
+    }
+
+    public void OnMouseDown()
+    {
+        MoneyExchangerPanel.SetActive(true);
+        MoneyExchanger.ShowMoney();
     }
 }

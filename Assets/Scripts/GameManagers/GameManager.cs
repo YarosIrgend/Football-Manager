@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -18,19 +17,16 @@ public class GameManager : MonoBehaviour
     public Player CurrentPlayer; // поточний гравець, який ходить
     public int CurrentPlayerIndex; // індекс поточного гравця
 
-    [Header("Buttons")] 
-    public GameObject MakeTurnButton;
+    [Header("Buttons")] public GameObject MakeTurnButton;
     public GameObject EndTurnButton;
     public GameObject CloseMessagePanelButton;
     public GameObject ClosePropertyInfoPanelButton;
-    
-    [Header("Panels")]
-    public GameObject MessagePanel;
+
+    [Header("Panels")] public GameObject MessagePanel;
     public GameObject PropertyInfoPanel;
-    
-    [Header("Other")]
-    public GameObject CardPrefab;
-    
+
+    [Header("Other")] public GameObject CardPrefab;
+
     private void Start()
     {
         //Game.GameSettings = MatchSettingsController.GameSettings;
@@ -40,6 +36,8 @@ public class GameManager : MonoBehaviour
         PropertyManager.SetPlayers(Game.Players);
         BoardManager.CellManager.InitializeCells();
         CurrentPlayer = Game.Players[CurrentPlayerIndex]; // наш гравець перший ходить 
+        SetPlayerToMoneyExchanger();
+        SetBanknoteClickablesToExchanger();
     }
 
     private void InitializeGame()
@@ -482,7 +480,6 @@ public class GameManager : MonoBehaviour
         EndTurnButton.SetActive(true);
     }
 
-
     public void EndPlayerTurn()
     {
         EndTurnButton.SetActive(false);
@@ -558,7 +555,61 @@ public class GameManager : MonoBehaviour
     }
 
     # endregion
-    
+
+    # region Bank
+
+    // для взаємодії гравця з обміном купюр
+    private void SetPlayerToMoneyExchanger()
+    {
+        var bank = GameObject.Find("Canvas/Bank").gameObject;
+        var moneyExchanger = bank.transform.Find("MoneyExchanger").GetComponent<MoneyExchanger>();
+        moneyExchanger.Player = CurrentPlayer;
+    }
+
+    private void SetBanknoteClickablesToExchanger()
+    {
+        var bank = GameObject.Find("Canvas/Bank");
+        var exchanger = bank.transform
+            .Find("MoneyExchanger")
+            .GetComponent<MoneyExchanger>();
+
+        InitPanelClickables(
+            exchanger.PlayerMoneyPanel.transform, exchanger, true
+        );
+
+        InitPanelClickables(
+            exchanger.BankMoneyPanel.transform, exchanger, false
+        );
+    }
+
+    private void InitPanelClickables(Transform panel, MoneyExchanger exchanger, bool isPlayerPanel)
+    {
+        string[] banknoteNames =
+        {
+            "Banknote5M",
+            "Banknote2M",
+            "Banknote1M",
+            "Banknote500K",
+            "Banknote200K",
+            "Banknote100K"
+        };
+        for (int i = 0; i < banknoteNames.Length; i++)
+        {
+            int index = i;
+
+            var banknoteRow = panel.Find(banknoteNames[i]);
+            var image = banknoteRow.GetComponentInChildren<Image>();
+
+            var clickable = image.gameObject.AddComponent<BanknoteClickable>();
+
+            clickable.Action = isPlayerPanel
+                ? () => exchanger.GiveBanknoteToBank(index)
+                : () => exchanger.TakeBanknoteFromBank(index);
+        }
+    }
+
+    # endregion
+
     public void ShowInfoPanel(string message)
     {
         MessagePanel.SetActive(true);
