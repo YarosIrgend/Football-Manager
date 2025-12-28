@@ -3,10 +3,10 @@
 public class CellClicker : MonoBehaviour
 {
     public Cell Cell;
-    public GameManager GameManager;
+    public CellManager CellManager;
     
     private void OnMouseDown()
     {
-        GameManager.OnCellClicked(Cell);
+        CellManager.OnCellClicked(Cell);
     }
 }

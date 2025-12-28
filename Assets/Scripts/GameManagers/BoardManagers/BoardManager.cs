@@ -4,6 +4,7 @@ public class BoardManager : MonoBehaviour
 {
     public Board Board;
     public CellActionManager CellActionManager;
+    public CellManager CellManager;
     
     [Header("Chip Prefabs")] 
     public GameObject BlueChipPrefab;
@@ -96,4 +97,13 @@ public class BoardManager : MonoBehaviour
     }
     
     #endregion
+    
+    # region Cells
+
+    public void InitializeCells()
+    {
+        CellManager.InitializeCells();    
+    }
+    
+    # endregion
 }

@@ -4158,6 +4158,7 @@ Transform:
   m_LocalScale: {x: 11.5, y: 1, z: 7}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 972513856}
   - {fileID: 1016208088}
   - {fileID: 937793954}
   - {fileID: 1811549445}
@@ -4433,7 +4434,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 823623274}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -138}
+  m_LocalPosition: {x: 0, y: 0, z: -109.4}
   m_LocalScale: {x: 1, y: 0.12952718, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4443,7 +4444,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 176.79999}
+  m_AnchoredPosition: {x: 0, y: 186.1}
   m_SizeDelta: {x: 0, y: -0.99998474}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &823623276
@@ -5572,6 +5573,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BoardManager
   Board: {fileID: 728053867}
   CellActionManager: {fileID: 1024979012}
+  CellManager: {fileID: 1589553949}
   BlueChipPrefab: {fileID: 3403691115276779584, guid: 5a8e80c6bcfea00429a7a3a5a7a95415, type: 3}
   GreenChipPrefab: {fileID: 1648459518365905705, guid: 82ab2200a78fc0747a30610920d74f06, type: 3}
   RedChipPrefab: {fileID: 4463389418794702320, guid: d7560c1427075d84699173f12d1f3332, type: 3}
@@ -5584,13 +5586,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 972513854}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: -0, y: -1, z: -0, w: 0}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.086956516, y: 1, z: 0.14285713}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1589553950}
   - {fileID: 1024979013}
-  m_Father: {fileID: 1175089491}
+  m_Father: {fileID: 728053866}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &997716900
 GameObject:
@@ -6496,7 +6499,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1175089491}
+  m_Father: {fileID: 1979534978}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1126107624
 GameObject:
@@ -6824,10 +6827,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1956227434}
-  - {fileID: 1122287087}
   - {fileID: 1979534978}
-  - {fileID: 972513856}
-  - {fileID: 1467692007}
   - {fileID: 728053866}
   - {fileID: 2098127469}
   m_Father: {fileID: 0}
@@ -8843,7 +8843,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1175089491}
+  m_Father: {fileID: 1979534978}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1467692008
 MonoBehaviour:
@@ -9730,6 +9730,54 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1577817519}
   m_CullTransparentMesh: 1
+--- !u!1 &1589553948
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1589553950}
+  - component: {fileID: 1589553949}
+  m_Layer: 0
+  m_Name: CellManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1589553949
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1589553948}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 562fedadd3dd490185318586073b29c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CellManager
+  BoardManager: {fileID: 972513855}
+  Game: {fileID: 1979534977}
+  PropertyInfoPanel: {fileID: 1413655558}
+  CardPrefab: {fileID: 1730376022}
+--- !u!4 &1589553950
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1589553948}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -2.5804, y: 0, z: 25.25237}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 972513856}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1602669715
 GameObject:
   m_ObjectHideFlags: 0
@@ -10780,8 +10828,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1122287086}
-        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+      - m_Target: {fileID: 1589553949}
+        m_TargetAssemblyTypeName: CellManager, Assembly-CSharp
         m_MethodName: ClosePropertyInfoPanel
         m_Mode: 1
         m_Arguments:
@@ -11939,7 +11987,9 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1122287087}
+  - {fileID: 1467692007}
   m_Father: {fileID: 1175089491}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1986059430

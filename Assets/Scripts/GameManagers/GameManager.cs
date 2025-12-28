@@ -30,7 +30,7 @@ public class GameManager : MonoBehaviour
     
     [Header("Other")]
     public GameObject CardPrefab;
-
+    
     private void Start()
     {
         //Game.GameSettings = MatchSettingsController.GameSettings;
@@ -38,10 +38,7 @@ public class GameManager : MonoBehaviour
         BoardManager.GenerateSnapPoints();
         InitializeGame();
         PropertyManager.SetPlayers(Game.Players);
-        InitializeClubs();
-        InitializeTelecompanies();
-        AssignClickersToCells();
-        InitializeBonusesAndFines();
+        BoardManager.CellManager.InitializeCells();
         CurrentPlayer = Game.Players[CurrentPlayerIndex]; // наш гравець перший ходить 
     }
 
@@ -49,6 +46,9 @@ public class GameManager : MonoBehaviour
     {
         InitializePlayers();
         SetChips();
+        InitializeClubs();
+        InitializeTelecompanies();
+        InitializeBonusesAndFines();
     }
 
     #region Players
@@ -166,7 +166,7 @@ public class GameManager : MonoBehaviour
             {
                 Name = "ПСЖ",
                 ImagePath = "Images/Club Cards/PSG",
-                Price = 2_000_000,
+                Price = 2_200_000,
                 IncomeWithPlayer = 500_000,
                 IncomeWithTrainer = 1_500_000,
                 IncomeWithManager = 8_000_000,
@@ -177,7 +177,7 @@ public class GameManager : MonoBehaviour
             {
                 Name = "Ліон",
                 ImagePath = "Images/Club Cards/Lyon",
-                Price = 1_500_000,
+                Price = 1_400_000,
                 IncomeWithPlayer = 500_000,
                 IncomeWithTrainer = 1_000_000,
                 IncomeWithManager = 6_000_000,
@@ -187,8 +187,8 @@ public class GameManager : MonoBehaviour
             new Club
             {
                 Name = "Марсель",
-                ImagePath = "Images/Club Cards/Marseiile",
-                Price = 1_500_000,
+                ImagePath = "Images/Club Cards/Marseille",
+                Price = 1_400_000,
                 IncomeWithPlayer = 500_000,
                 IncomeWithTrainer = 1_000_000,
                 IncomeWithManager = 6_000_000,
@@ -472,10 +472,16 @@ public class GameManager : MonoBehaviour
     public void TurnPlayer()
     {
         MakeTurnButton.SetActive(false);
-        MovePlayerChip();
+
+        int cells = ThrowDices();
+        ShowInfoPanel($"Випало: {cells}");
+
+        MovePlayerChip(cells);
         SetNextPlayer();
+
         EndTurnButton.SetActive(true);
     }
+
 
     public void EndPlayerTurn()
     {
@@ -506,14 +512,13 @@ public class GameManager : MonoBehaviour
         return currentCell.Index >= newCell.Index;
     }
 
-    private void MovePlayerChip()
+    private void MovePlayerChip(int cells)
     {
-        int cellsToPass = ThrowDices();
         var currentCell = CurrentPlayer.ChipBehaviour.CurrentCell;
 
-        ShowInfoPanel($"Випало: {cellsToPass.ToString()}");
+        ShowInfoPanel($"Випало: {cells.ToString()}");
 
-        BoardManager.MovePlayerChip(CurrentPlayer.ChipBehaviour, cellsToPass);
+        BoardManager.MovePlayerChip(CurrentPlayer.ChipBehaviour, cells);
         var newCell = CurrentPlayer.ChipBehaviour.CurrentCell; // нова клітинка
         CellActionManager.DoActionAccordingCell(newCell, CurrentPlayer); // спільний для гравця та противників
 
@@ -528,7 +533,7 @@ public class GameManager : MonoBehaviour
     {
         while (CurrentPlayerIndex != 0)
         {
-            ShowInfoPanel("Хід наступного противника");
+            ShowInfoPanel($"Хід наступного противника: {CurrentPlayer.ColorString}");
             yield return new WaitForSeconds(1f);
             CloseMessagePanel();
 
@@ -546,138 +551,15 @@ public class GameManager : MonoBehaviour
         ShowInfoPanel($"Випало: {cells}");
         yield return new WaitForSeconds(1f);
 
-        MovePlayerChip();
+        MovePlayerChip(cells);
         CloseMessagePanel();
 
         SetNextPlayer();
     }
 
     # endregion
-
-    # region Cells
-
-    private void AssignClickersToCells()
-    {
-        foreach (var cell in BoardManager.Board.cells)
-        {
-            if (cell.Type is CellType.Club or CellType.Telecompany)
-            {
-                var clicker = cell.gameObject.AddComponent<CellClicker>();
-                clicker.Cell = cell;
-                clicker.GameManager = this;
-            }
-        }
-    }
-
-    public void OnCellClicked(Cell cell)
-    {
-        ShowPropertyInfoPanel(cell.CellName);
-    }
-
-    private void ShowPropertyInfoPanel(string cellName)
-    {
-        var property = Game.Clubs.FirstOrDefault(club => club.Name == cellName) as Property ??
-                       Game.Telecompanies.First(telecompany => telecompany.Name == cellName);
-
-        ShowPropertyInfo(property);
-    }
-
-    private void ShowPropertyInfo(Property property)
-    {
-        Debug.Log($"Open club: {property.Name}");
-        PropertyInfoPanel.SetActive(true);
-
-        GameObject card = Instantiate(CardPrefab, PropertyInfoPanel.transform); // карта
-        card.name = "Image";
-        card.SetActive(true);
-        var image = card.GetComponent<Image>(); // зображення
-        image.sprite = Resources.Load<Sprite>(property.ImagePath);
-        var rt = card.GetComponent<RectTransform>(); // розмір
-        rt.sizeDelta = new Vector2(400f, 400f);
-
-        SetPropertyData(property);
-    }
-
-    private void SetPropertyData(Property property)
-    {
-        Transform propertyInfo = PropertyInfoPanel.transform.Find("PropertyInfo");
-
-        CreateRow("NameRow", propertyInfo, $"Назва:   {property.Name}");
-        CreateRow("PriceRow", propertyInfo, $"Ціна:   {property.Price}");
-        CreateRow("MortgagePriceRow", propertyInfo, $"Ціна закладення:   {property.Price / 2}");
-        if (property is Club club)
-        {
-            CreateRow("IncomeWithPlayerRow", propertyInfo, $"Дохід з гравцем:   {club.IncomeWithPlayer}");
-            CreateRow("IncomeWithTrainerRow", propertyInfo, $"Дохід з тренером:   {club.IncomeWithTrainer}");
-            CreateRow("IncomeWithManagerRow", propertyInfo, $"Дохід з менеджером:   {club.IncomeWithManager}");
-        }
-    }
-
-    private static void CreateRow(string rowName, Transform parent, string text)
-    {
-        // ===== ROW =====
-        GameObject row = new GameObject(rowName);
-        row.transform.SetParent(parent, false);
-
-        var rowRT = row.AddComponent<RectTransform>();
-
-        rowRT.anchorMin = new Vector2(0, 1);
-        rowRT.anchorMax = new Vector2(1, 1);
-        rowRT.pivot = new Vector2(0, 1);
-        rowRT.sizeDelta = new Vector2(0, 32);
-
-        var rowLayout = row.AddComponent<LayoutElement>();
-        rowLayout.minHeight = 32;
-        rowLayout.preferredHeight = 32;
-        rowLayout.flexibleHeight = 0;
-        rowLayout.minWidth = 0;
-
-        // ===== DATA (TEXT) =====
-        GameObject dataObj = new GameObject("Data");
-        dataObj.transform.SetParent(row.transform, false);
-
-        var tmp = dataObj.AddComponent<TextMeshProUGUI>();
-        tmp.text = text;
-        tmp.fontSize = 40;
-        tmp.color = Color.yellow;
-        tmp.fontStyle = FontStyles.Bold;
-        tmp.alignment = TextAlignmentOptions.Left;
-
-        // Не стискати текст
-        tmp.textWrappingMode = TextWrappingModes.NoWrap;
-        tmp.overflowMode = TextOverflowModes.Overflow;
-        tmp.autoSizeTextContainer = false;
-
-        // RectTransform тексту
-        var textRT = tmp.rectTransform;
-        textRT.anchorMin = new Vector2(0, 0);
-        textRT.anchorMax = new Vector2(1, 1);
-        textRT.pivot = new Vector2(0, 0.5f);
-        textRT.offsetMin = new Vector2(10, 0); // padding зліва
-        textRT.offsetMax = new Vector2(-10, 0); // padding справа
-    }
-
-    public void ClosePropertyInfoPanel()
-    {
-        PropertyInfoPanel.SetActive(false);
-        ClearPropertyInfo();
-    }
     
-    private void ClearPropertyInfo()
-    {
-        // видалити зображення
-        var clubImage = PropertyInfoPanel.transform.Find("Image");
-        Destroy(clubImage.gameObject);
-    
-        // видалити рядки
-        var clubInfo = PropertyInfoPanel.transform.Find("PropertyInfo");
-        foreach (Transform child in clubInfo)
-            Destroy(child.gameObject);
-    }
-    
-    # endregion
-
-    private void ShowInfoPanel(string message)
+    public void ShowInfoPanel(string message)
     {
         MessagePanel.SetActive(true);
         var text = MessagePanel.transform.Find("Message").GetComponent<TextMeshProUGUI>();
