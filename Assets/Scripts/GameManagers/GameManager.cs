@@ -8,25 +8,33 @@ using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour
 {
-    [Header("Managers")] public BoardManager BoardManager;
+    [Header("Managers")] 
+    public BoardManager BoardManager;
     public PropertyManager PropertyManager;
     public CellActionManager CellActionManager;
 
-    [Header("Objects")] public Game Game;
+    [Header("Objects")] 
+    public Game Game;
 
     public Player CurrentPlayer; // поточний гравець, який ходить
     public int CurrentPlayerIndex; // індекс поточного гравця
-
-    [Header("Buttons")] public GameObject MakeTurnButton;
+    private bool AreTurnConditionsCompleted; // закінчити хід можна лише після виконання умов (оплати)
+    
+    [Header("Buttons")]
+    public GameObject MakeTurnButton;
     public GameObject EndTurnButton;
     public GameObject CloseMessagePanelButton;
     public GameObject ClosePropertyInfoPanelButton;
 
-    [Header("Panels")] public GameObject MessagePanel;
+    [Header("Panels")] 
+    public GameObject MessagePanel;
     public GameObject PropertyInfoPanel;
 
-    [Header("Other")] public GameObject CardPrefab;
-
+    [Header("Other")] 
+    public GameObject CardPrefab;
+    public Bank Bank;
+    public MoneyPayer MoneyPayer;
+    
     private void Start()
     {
         //Game.GameSettings = MatchSettingsController.GameSettings;
@@ -38,6 +46,8 @@ public class GameManager : MonoBehaviour
         CurrentPlayer = Game.Players[CurrentPlayerIndex]; // наш гравець перший ходить 
         SetPlayerToMoneyExchanger();
         SetBanknoteClickablesToExchanger();
+        SetPlayerToMoneyPayer();
+        SetBanknoteClickablesToPayer();
     }
 
     private void InitializeGame()
@@ -123,22 +133,22 @@ public class GameManager : MonoBehaviour
             new BanknoteGroup
             {
                 Banknote = new Banknote { BanknoteImagePath = null, Value = 1_000_000 },
-                Amount = 1
+                Amount = 0
             },
             new BanknoteGroup
             {
                 Banknote = new Banknote { BanknoteImagePath = null, Value = 500_000 },
-                Amount = 2
+                Amount = 0
             },
             new BanknoteGroup
             {
                 Banknote = new Banknote { BanknoteImagePath = null, Value = 200_000 },
-                Amount = 3
+                Amount = 0
             },
             new BanknoteGroup
             {
                 Banknote = new Banknote { BanknoteImagePath = null, Value = 100_000 },
-                Amount = 4
+                Amount = 0
             }
         };
     }
@@ -471,17 +481,23 @@ public class GameManager : MonoBehaviour
     {
         MakeTurnButton.SetActive(false);
 
-        int cells = ThrowDices();
+        //int cells = ThrowDices();
+        int cells = 8;
         ShowInfoPanel($"Випало: {cells}");
 
         MovePlayerChip(cells);
         SetNextPlayer();
-
+        
         EndTurnButton.SetActive(true);
     }
 
     public void EndPlayerTurn()
     {
+        if (!AreTurnConditionsCompleted)
+        {
+            MoneyPayer.ConditionsWarningPanel.SetActive(true);
+            return;
+        }
         EndTurnButton.SetActive(false);
         StartCoroutine(OpponentsTurnsCoroutine()); // здійснення ходів противника, поки ми чекаємо
     }
@@ -517,7 +533,7 @@ public class GameManager : MonoBehaviour
 
         BoardManager.MovePlayerChip(CurrentPlayer.ChipBehaviour, cells);
         var newCell = CurrentPlayer.ChipBehaviour.CurrentCell; // нова клітинка
-        CellActionManager.DoActionAccordingCell(newCell, CurrentPlayer); // спільний для гравця та противників
+        CellActionManager.DoActionAccordingCell(newCell, CurrentPlayer, out AreTurnConditionsCompleted); // спільний для гравця та противників
 
         // якщо пройшли старт, треба виплатити
         if (StartCellPassed(currentCell, newCell))
@@ -544,7 +560,8 @@ public class GameManager : MonoBehaviour
     {
         yield return new WaitForSeconds(0.5f);
 
-        int cells = ThrowDices();
+        //int cells = ThrowDices();
+        int cells = 8;
         ShowInfoPanel($"Випало: {cells}");
         yield return new WaitForSeconds(1f);
 
@@ -561,28 +578,82 @@ public class GameManager : MonoBehaviour
     // для взаємодії гравця з обміном купюр
     private void SetPlayerToMoneyExchanger()
     {
-        var bank = GameObject.Find("Canvas/Bank").gameObject;
-        var moneyExchanger = bank.transform.Find("MoneyExchanger").GetComponent<MoneyExchanger>();
-        moneyExchanger.Player = CurrentPlayer;
+        var moneyExchanger = GameObject.Find("Canvas/MoneyExchangerObject").gameObject;
+        var moneyExchangerComponent = moneyExchanger.GetComponent<MoneyExchanger>();
+        moneyExchangerComponent.Player = CurrentPlayer;
     }
+    
+    private void SetPlayerToMoneyPayer()
+    {
+        var moneyPayer = GameObject.Find("Canvas").transform.Find("MoneyPayerObject").gameObject;
 
+        var moneyPayerComponent = moneyPayer.GetComponent<MoneyPayer>();
+        moneyPayerComponent.Player = CurrentPlayer;
+    }
+    
     private void SetBanknoteClickablesToExchanger()
     {
-        var bank = GameObject.Find("Canvas/Bank");
-        var exchanger = bank.transform
-            .Find("MoneyExchanger")
+        var exchanger = GameObject.Find("Canvas/MoneyExchangerObject");
+        var exchangerComponent = exchanger
             .GetComponent<MoneyExchanger>();
 
-        InitPanelClickables(
-            exchanger.PlayerMoneyPanel.transform, exchanger, true
+        InitPanelClickablesToExchanger(
+            exchangerComponent.PlayerMoneyPanel.transform, exchangerComponent, true
         );
 
-        InitPanelClickables(
-            exchanger.BankMoneyPanel.transform, exchanger, false
+        InitPanelClickablesToExchanger(
+            exchangerComponent.BankMoneyPanel.transform, exchangerComponent, false
         );
     }
 
-    private void InitPanelClickables(Transform panel, MoneyExchanger exchanger, bool isPlayerPanel)
+    private void SetBanknoteClickablesToPayer()
+    {
+        var moneyPayer = GameObject.Find("Canvas").transform.Find("MoneyPayerObject").gameObject;
+        
+        var moneyPayerComponent = moneyPayer
+            .GetComponent<MoneyPayer>();
+
+        InitPanelClickablesToPayer(
+            moneyPayerComponent.PlayerMoneyPanel.transform,
+            moneyPayerComponent,
+            isPlayerPanel: true
+        );
+
+        InitPanelClickablesToPayer(
+            moneyPayerComponent.BankMoneyPanel.transform,
+            moneyPayerComponent,
+            isPlayerPanel: false
+        );
+    }
+    
+    private void InitPanelClickablesToPayer(Transform panel, MoneyPayer payer, bool isPlayerPanel)
+    {
+        string[] banknoteNames =
+        {
+            "Banknote5M",
+            "Banknote2M",
+            "Banknote1M",
+            "Banknote500K",
+            "Banknote200K",
+            "Banknote100K"
+        };
+
+        for (int i = 0; i < banknoteNames.Length; i++)
+        {
+            int index = i;
+
+            var banknoteRow = panel.Find(banknoteNames[i]);
+            var image = banknoteRow.GetComponentInChildren<Image>();
+
+            var clickable = image.gameObject.AddComponent<BanknoteClickable>();
+
+            clickable.Action = isPlayerPanel
+                ? () => payer.GiveBanknoteToBank(index, out AreTurnConditionsCompleted)
+                : () => payer.TakeBanknoteFromBank(index, out AreTurnConditionsCompleted);
+        }
+    }
+    
+    private void InitPanelClickablesToExchanger(Transform panel, MoneyExchanger exchanger, bool isPlayerPanel)
     {
         string[] banknoteNames =
         {

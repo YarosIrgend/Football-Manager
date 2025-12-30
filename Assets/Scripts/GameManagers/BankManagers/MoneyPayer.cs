@@ -1,19 +1,23 @@
 ﻿using TMPro;
 using UnityEngine;
 
-public class MoneyExchanger : MonoBehaviour
+// панель для давання коштів в банк
+public class MoneyPayer : MonoBehaviour
 {
     public Player Player;
-    public GameObject MoneyExchangerPanel;
+    public GameObject MoneyPayerPanel;
     public GameObject PlayerMoneyPanel;
     public GameObject BankMoneyPanel;
-    public GameObject ExchangeWarningPanel;
+    public GameObject ConditionsWarningPanel;
+    public GameObject MoneyPayerObject;
     
-    public int GivenMoney;
-    
+    public int RequiredMoney;
+
     public void ShowMoney()
     {
         ShowBanknotes();
+        ShowMoneySum();
+        UpdateGivenMoneySum();
     }
 
     private void ShowBanknotes()
@@ -28,59 +32,61 @@ public class MoneyExchanger : MonoBehaviour
             banknoteText.text = $"x{banknote.Amount}";
         }
     }
-    
-    public void MoneyExchangerPanelClose()
+
+    public void MoneyPayerPanelClose()
     {
-        if (GivenMoney == 0)
-        {
-            MoneyExchangerPanel.SetActive(false);
-        }
-        else
-        {
-            ExchangeWarningPanel.SetActive(true);
-        }
+        MoneyPayerPanel.SetActive(false);
     }
 
-    public void ExchangerWarningPanelClose()
+    public void ConditionsWarningPanelClose()
     {
-        ExchangeWarningPanel.SetActive(false);
+        ConditionsWarningPanel.SetActive(false);
     }
-    
-    public void GiveBanknoteToBank(int banknoteIndex)
+
+    public void GiveBanknoteToBank(int banknoteIndex, out bool equalToZero)
     {
         var group = Player.Money[banknoteIndex];
 
-        if (group.Amount <= 0) 
+        if (group.Amount <= 0)
+        {
+            equalToZero = false;
             return;
+        }
 
         group.Amount--;
-        GivenMoney += group.Banknote.Value;
+        RequiredMoney -= group.Banknote.Value;
         UpdateGivenMoneySum();
         ShowMoney();
+        
+        equalToZero = RequiredMoney == 0;
     }
 
-    public void TakeBanknoteFromBank(int banknoteIndex)
+    public void TakeBanknoteFromBank(int banknoteIndex, out bool equalToZero)
     {
         var group = Player.Money[banknoteIndex];
-
-        if (GivenMoney < group.Banknote.Value) 
-            return;
-
+        
         group.Amount++;
-        GivenMoney -= group.Banknote.Value;
+        RequiredMoney += group.Banknote.Value;
         UpdateGivenMoneySum();
         ShowMoney();
+        equalToZero = RequiredMoney == 0;
     }
 
     private void UpdateGivenMoneySum()
     {
         var sum = BankMoneyPanel.transform.Find("Sum").GetComponent<TextMeshProUGUI>();
-        sum.text = $"Дано: {GivenMoney}";
+        sum.text = $"Потрібно: {RequiredMoney}";
     }
-    
+
+    private void ShowMoneySum()
+    {
+        var moneySumText = GameObject.Find("Sum").GetComponent<TextMeshProUGUI>();
+        moneySumText.text = $"Сума: {Player.MoneySum.ToString()}";
+    }
+
     public void OnMouseDown()
     {
-        MoneyExchangerPanel.SetActive(true);
+        MoneyPayerPanel.SetActive(true);
         ShowMoney();
     }
 }
