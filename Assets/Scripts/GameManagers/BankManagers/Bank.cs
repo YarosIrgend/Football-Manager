@@ -20,19 +20,67 @@ public class Bank : MonoBehaviour
         new Banknote { Value = 200_000 },
         new Banknote { Value = 100_000 }
     };
+    
+    // використати для визначення які купюри були надані для оплати і які надати гравцю, якому платять 
+    // public List<BanknoteGroup> GivenMoney = new()
+    // {
+    //     new BanknoteGroup
+    //     {
+    //         Banknote = new Banknote { Value = 5_000_000 },
+    //         Amount = 0
+    //     },
+    //     new BanknoteGroup
+    //     {
+    //         Banknote = new Banknote { Value = 2_000_000 },
+    //         Amount = 0
+    //     },
+    //     new BanknoteGroup
+    //     {
+    //         Banknote = new Banknote { Value = 1_000_000 },
+    //         Amount = 0
+    //     },
+    //     new BanknoteGroup
+    //     {
+    //         Banknote = new Banknote { Value = 500_000 },
+    //         Amount = 0
+    //     },
+    //     new BanknoteGroup
+    //     {
+    //         Banknote = new Banknote { Value = 200_000 },
+    //         Amount = 0
+    //     },
+    //     new BanknoteGroup
+    //     {
+    //         Banknote = new Banknote { Value = 100_000 },
+    //         Amount = 0
+    //     }
+    // };
+    //
+    // public int GivenMoneySum =>
+    //     GivenMoney.Sum(g => g.Banknote.Value * g.Amount);
+    //
+    // public void GivenMoneyReset()
+    // {
+    //     foreach (var group in GivenMoney)
+    //         group.Amount = 0;
+    // }
 
+    // Просте додавання грошей (бонуси, старт і т.д.)
+    
     public void AddMoney(Player player, int money)
     {
-        while (money != 0)
+        while (money > 0)
         {
-            var banknoteToPay = Banknotes.First(banknote => banknote.Value <= money);
-            var playerBanknoteToAdd =
-                player.Money.Find(banknoteGroup => banknoteGroup.Banknote.Value == banknoteToPay.Value);
-            playerBanknoteToAdd.Amount++;
-            money -= banknoteToPay.Value;
+            var banknote = Banknotes.First(b => b.Value <= money);
+            var playerGroup = player.Money
+                .First(g => g.Banknote.Value == banknote.Value);
+
+            playerGroup.Amount++;
+            money -= banknote.Value;
         }
     }
 
+    // Автоматичне зняття грошей (для ботів, податків і т.п.)
     public void TakeMoney(Player player, int requiredMoney)
     {
         int totalPaid = GetMinimalPayableSum(player, requiredMoney);
@@ -43,15 +91,12 @@ public class Bank : MonoBehaviour
             return;
         }
 
-        // знімаємо всю суму
         RemoveMoney(player, totalPaid);
 
-        // видаємо здачу
         int change = totalPaid - requiredMoney;
         if (change > 0)
-        {
             AddMoney(player, change);
-        }
+        
     }
 
     private void RemoveMoney(Player player, int amount)
@@ -68,7 +113,7 @@ public class Bank : MonoBehaviour
                 return;
         }
     }
-    
+
     private int GetMinimalPayableSum(Player player, int required)
     {
         int sum = 0;
@@ -82,5 +127,4 @@ public class Bank : MonoBehaviour
 
         return sum;
     }
-
 }

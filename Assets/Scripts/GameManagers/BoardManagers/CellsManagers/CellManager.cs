@@ -12,6 +12,7 @@ public class CellManager : MonoBehaviour
     [Header("UI")]
     public GameObject PropertyInfoPanel;
     public GameObject CardPrefab;
+    public GameObject BuyingChoice;
 
     public void InitializeCells()
     {
@@ -38,7 +39,7 @@ public class CellManager : MonoBehaviour
         ShowPropertyInfoPanel(cell.CellName);
     }
 
-    private void ShowPropertyInfoPanel(string cellName)
+    public void ShowPropertyInfoPanel(string cellName)
     {
         ClearPropertyInfo();
 

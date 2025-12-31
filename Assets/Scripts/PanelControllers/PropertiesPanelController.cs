@@ -82,7 +82,6 @@ public class PropertiesPanelController : MonoBehaviour
 
     private void ShowClubInfo(Club club)
     {
-        Debug.Log($"Open club: {club.Name}");
         ClubInfoPanel.SetActive(true);
 
         GameObject card = Instantiate(ClubCardPrefab, ClubInfoPanel.transform); // карта

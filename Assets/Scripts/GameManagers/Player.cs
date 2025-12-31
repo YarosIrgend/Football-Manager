@@ -22,7 +22,39 @@ public class Player
     }
 
     public Chip ChipBehaviour; // Ссилка на реальну фішку на сцені
-    public List<BanknoteGroup> Money; 
+    public List<BanknoteGroup> Money = new()
+    {
+        new BanknoteGroup
+        {
+            Banknote = new Banknote { BanknoteImagePath = null, Value = 5_000_000 },
+            Amount = 2
+        },
+        new BanknoteGroup
+        {
+            Banknote = new Banknote { BanknoteImagePath = null, Value = 2_000_000 },
+            Amount = 1
+        },
+        new BanknoteGroup
+        {
+            Banknote = new Banknote { BanknoteImagePath = null, Value = 1_000_000 },
+            Amount = 1
+        },
+        new BanknoteGroup
+        {
+            Banknote = new Banknote { BanknoteImagePath = null, Value = 500_000 },
+            Amount = 2
+        },
+        new BanknoteGroup
+        {
+            Banknote = new Banknote { BanknoteImagePath = null, Value = 200_000 },
+            Amount = 3
+        },
+        new BanknoteGroup
+        {
+            Banknote = new Banknote { BanknoteImagePath = null, Value = 100_000 },
+            Amount = 4
+        }
+    }; 
     public Opponent Opponent; // якщо Opponent == null - це наш гравець
 
     public int MoneySum 
@@ -30,10 +62,6 @@ public class Player
         get
         {
             return Money.Sum(banknoteGroup => banknoteGroup.Banknote.Value * banknoteGroup.Amount);
-        }
-        set
-        {
-            
         }
     }
 }
