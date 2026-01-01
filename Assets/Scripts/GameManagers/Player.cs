@@ -64,4 +64,6 @@ public class Player
             return Money.Sum(banknoteGroup => banknoteGroup.Banknote.Value * banknoteGroup.Amount);
         }
     }
+
+    public bool IsPlayable = true; // для позначення, чи пропускає хід
 }

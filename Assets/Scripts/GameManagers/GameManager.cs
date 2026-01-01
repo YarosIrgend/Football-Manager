@@ -120,7 +120,7 @@ public class GameManager : MonoBehaviour
 
     # region TurnHandler
 
-    private int ThrowDices()
+    public static int ThrowDices()
     {
         return Random.Range(2, 13);
     }
@@ -134,15 +134,29 @@ public class GameManager : MonoBehaviour
     {
         MakeTurnButton.SetActive(false);
 
-        int cells = 5;
+        // наш гравець пропускає хід
+        if (!CurrentPlayer.IsPlayable)
+        {
+            MessagePanelController.Instance.Show("Ви пропускаєте хід");
+            yield return new WaitForSeconds(1.5f);
 
+            CurrentPlayer.IsPlayable = true;
+
+            SetNextPlayer();
+            StartCoroutine(OpponentsTurnsCoroutine());
+            yield break;
+        }
+
+        int cells = 24;
+        //int cells = ThrowDices();
         MessagePanelController.Instance.Show($"Випало: {cells}");
         yield return new WaitForSeconds(1.5f);
 
         yield return StartCoroutine(MovePlayerChipCoroutine(cells));
-        
+
         EndTurnButton.SetActive(true);
     }
+
 
     public void EndPlayerTurn()
     {
@@ -169,18 +183,28 @@ public class GameManager : MonoBehaviour
 
             CellActionManager.PendingPurchase = null; // очищаємо після покупки
         }
-        
+
         EndTurnButton.SetActive(false);
         SetNextPlayer();
         StartCoroutine(OpponentsTurnsCoroutine()); // здійснення ходів противника
     }
-    
+
     private IEnumerator OpponentsTurnsCoroutine()
     {
         while (CurrentPlayerIndex != 0)
         {
             MessagePanelController.Instance.Show($"Хід наступного противника: {CurrentPlayer.ColorString}");
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(1.5f);
+
+            if (!CurrentPlayer.IsPlayable)
+            {
+                MessagePanelController.Instance.Show($"{CurrentPlayer.ColorString} пропускає хід");
+                yield return new WaitForSeconds(1.5f);
+                CurrentPlayer.IsPlayable = true;
+                SetNextPlayer();
+                MessagePanelController.Instance.Show($"Хід наступного противника: {CurrentPlayer.ColorString}");
+                yield return new WaitForSeconds(1.5f);
+            }
 
             yield return StartCoroutine(OpponentTurnCoroutine());
         }
@@ -190,7 +214,7 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator OpponentTurnCoroutine()
     {
-        int cells = 5;
+        var cells = 1;
 
         MessagePanelController.Instance.Show($"Випало: {cells}");
         yield return new WaitForSeconds(1.5f);
@@ -199,7 +223,7 @@ public class GameManager : MonoBehaviour
 
         SetNextPlayer();
     }
-    
+
     // переключення ходу на наступного гравця
     private void SetNextPlayer()
     {

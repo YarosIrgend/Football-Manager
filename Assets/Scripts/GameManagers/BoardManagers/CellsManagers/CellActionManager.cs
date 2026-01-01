@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Linq;
+using UnityEditor.VersionControl;
 using UnityEngine;
 
 public class CellActionManager : MonoBehaviour
@@ -15,7 +16,7 @@ public class CellActionManager : MonoBehaviour
     private bool BuyChoice;
 
     [HideInInspector] public Property PendingPurchase; // нерухомість, яку гравець вирішив купити
-    
+
     // спільний для гравця та противників
     // у Handles окремі обробки для гравця та противників
     public IEnumerator DoActionAccordingCellCoroutine(Game game, Cell cell, Player player, Action<bool> onCompleted)
@@ -54,6 +55,8 @@ public class CellActionManager : MonoBehaviour
                 break;
 
             case CellType.Disqualification:
+                yield return HandleDisqualificationCoroutine(player);
+                completed = true;
                 break;
 
             default:
@@ -70,12 +73,61 @@ public class CellActionManager : MonoBehaviour
 
     private IEnumerator HandleClubCoroutine(Game game, Cell cell, Player player, Action<bool> onCompleted)
     {
+        MessagePanelController.Instance.Show($"Клуб - {cell.CellName}");
         yield return new WaitForSeconds(1.5f);
+
+        var club =
+            GameManager.Game.Clubs.FirstOrDefault(t => t.Name == cell.CellName);
+
+        // визначити, чи хтось володіє клубом, якщо так треба матч провести (якщо клуби є)
+        var owner = game.Players.FirstOrDefault(p => p.Clubs.Any(tc => tc.Name == club!.Name));
+        if (owner != null && owner != player)
+        {
+            MessagePanelController.Instance.Show(
+                $"Є гравець {owner.ColorString}, який володіє цим клубом.");
+            yield return new WaitForSeconds(1.5f);
+
+            var ownerClub = owner.Clubs.FirstOrDefault(t => t.Name == cell.CellName); 
+            // якщо клуб є, треба провести матч за можливості
+            yield return StartCoroutine(HoldTheMatchCouroutine(owner, player, ownerClub));
+
+            onCompleted(false);
+        }
+
+        // якщо ніхто не володіє, то можна придбати за бажанням
+        else
+        {
+            if (player.Opponent == null)
+            {
+                ShowPropertyWithChoiceToBuy(cell);
+                // Чекаємо натискання кнопки
+                while (CellManager.BuyingChoice.activeSelf)
+                    yield return null;
+
+                if (BuyChoice)
+                {
+                    MoneyPayer.RequiredMoney = club!.Price;
+                    MoneyPayer.MoneyPayerObject.SetActive(true);
+                    MoneyPayer.MoneyPayerPanel.SetActive(true);
+                    MoneyPayer.ShowMoney();
+                    onCompleted(false);
+                }
+                else
+                {
+                    onCompleted(true);
+                }
+            }
+            else
+            {
+                // Противник → автоматична обробка
+                onCompleted(true);
+            }
+        }
     }
 
     private IEnumerator HandleTelecompanyCoroutine(Game game, Cell cell, Player player, Action<bool> onCompleted)
     {
-        MessagePanelController.Instance.Show("Телекомпанія");
+        MessagePanelController.Instance.Show($"Телекомпанія - {cell.CellName}");
         yield return new WaitForSeconds(1.5f);
 
         var telecompany =
@@ -93,7 +145,7 @@ public class CellActionManager : MonoBehaviour
                 1 => 300_000,
                 2 => 500_000,
                 3 => 1_000_000,
-                4 => 2_000_000,
+                _ => 2_000_000
             };
             if (player.Opponent == null) // наш гравець платить
             {
@@ -123,7 +175,7 @@ public class CellActionManager : MonoBehaviour
 
                 if (BuyChoice)
                 {
-                    MoneyPayer.RequiredMoney = telecompany.Price;
+                    MoneyPayer.RequiredMoney = telecompany!.Price;
                     MoneyPayer.MoneyPayerObject.SetActive(true);
                     MoneyPayer.MoneyPayerPanel.SetActive(true);
                     MoneyPayer.ShowMoney();
@@ -196,6 +248,159 @@ public class CellActionManager : MonoBehaviour
         }
     }
 
+    private IEnumerator HandleDisqualificationCoroutine(Player player)
+    {
+        MessagePanelController.Instance.Show($"Гравець {player.ColorString} отримує дискваліфікацію " +
+                                             "(пропускає хід)");
+        yield return new WaitForSeconds(1.5f);
+
+        player.IsPlayable = false;
+    }
+    
+    private IEnumerator HoldTheMatchCouroutine(Player host, Player guest, Club hostClub)
+    {
+        if (!hostClub.IsPlayable || hostClub.Footballer == null)
+        {
+            MessagePanelController.Instance.Show("Домашній клуб не може грати");
+            yield return new WaitForSeconds(1.5f);
+            yield break;
+        }
+
+        if (guest.Clubs.Count == 0)
+        {
+            MessagePanelController.Instance.Show("У гостя нема клубів");
+            yield return new WaitForSeconds(1.5f);
+            yield break;
+        }
+
+        var guestClub = guest.Clubs.FirstOrDefault(club => club.IsPlayable);
+
+        // якщо вільного гостьового клубу нема, то технічна поразка
+        if (guestClub == null)
+        {
+            MessagePanelController.Instance.Show("У гостя нема клубів не в запасі");
+            yield return new WaitForSeconds(1.5f);
+            MessagePanelController.Instance.Show($"Технічна поразка, оплата {MatchPaymentSum(hostClub)}");
+            yield return new WaitForSeconds(1.5f);
+
+            MoneyPayer.RequiredMoney = MatchPaymentSum(hostClub);
+            if (guest.Opponent == null) // наш гравець платить
+            {
+                MoneyPayer.MoneyPayerObject.SetActive(true);
+                MoneyPayer.MoneyPayerPanel.SetActive(true);
+                MoneyPayer.ShowMoney();
+                Bank.AddMoney(host, MoneyPayer.RequiredMoney);
+            }
+            else // противник платить
+            {
+                var payment = MoneyPayer.RequiredMoney;
+                Bank.TakeMoney(guest, payment);
+                Bank.AddMoney(host, payment);
+            }
+
+            yield break;
+        }
+
+        // якщо є проводиться матч
+        MessagePanelController.Instance.Show($"Матч між {hostClub.Name} ({host.ColorString})" +
+                                             $" проти {guestClub.Name} ({guest.ColorString})");
+        yield return new WaitForSeconds(1.5f);
+
+        // хід господаря
+        MessagePanelController.Instance.Show($"Хід {hostClub.Name} ({host.ColorString})");
+        yield return new WaitForSeconds(1.5f);
+
+        int hostPoints = GameManager.ThrowDices();
+        MessagePanelController.Instance.Show($"Випало: {hostPoints}");
+        yield return new WaitForSeconds(1.5f);
+
+        hostPoints += hostClub.Footballer.Points;
+        MessagePanelController.Instance.Show($"Плюс {hostClub.Footballer.Points} очок гравця: {hostPoints}");
+        yield return new WaitForSeconds(1.5f);
+
+        if (hostClub.Trainer != null)
+        {
+            hostPoints += hostClub.Trainer.Points;
+            MessagePanelController.Instance.Show($"Плюс {hostClub.Trainer.Points} очок тренера: {hostPoints}");
+            yield return new WaitForSeconds(1.5f);
+        }
+
+        // хід гостя
+        MessagePanelController.Instance.Show($"Хід {guestClub.Name} ({guest.ColorString})");
+        yield return new WaitForSeconds(1.5f);
+        int guestPoints = GameManager.ThrowDices();
+        MessagePanelController.Instance.Show($"Випало: {guestPoints}");
+        yield return new WaitForSeconds(1.5f);
+
+        guestPoints += guestClub.Footballer.Points;
+        MessagePanelController.Instance.Show($"Плюс {guestClub.Footballer.Points} очок гравця: {guestPoints}");
+        yield return new WaitForSeconds(1.5f);
+
+        if (guestClub.Trainer != null)
+        {
+            guestPoints += guestClub.Trainer.Points;
+            MessagePanelController.Instance.Show($"Плюс {guestClub.Trainer.Points} очок тренера: {guestPoints}");
+            yield return new WaitForSeconds(1.5f);
+        }
+
+        // вивести переможця
+        Player winner = null;
+        if (hostPoints > guestPoints)
+        {
+            winner = host;
+            MessagePanelController.Instance.Show($"Переміг {hostClub.Name} ({host.ColorString}) " +
+                                                 $"із рахунком {hostPoints}:{guestPoints}");
+        }
+        else if (hostPoints < guestPoints)
+        {
+            winner = guest;
+            MessagePanelController.Instance.Show($"Переміг {guestClub.Name} ({guest.ColorString}) " +
+                                                 $"із рахунком {hostPoints}:{guestPoints}");
+        }
+        else
+        {
+            MessagePanelController.Instance.Show("Нічия");
+        }
+
+        yield return new WaitForSeconds(1.5f);
+
+        if (winner == host)
+        {
+            MoneyPayer.RequiredMoney = MatchPaymentSum(hostClub);
+            if (guest.Opponent == null) // наш гравець платить
+            {
+                MoneyPayer.MoneyPayerObject.SetActive(true);
+                MoneyPayer.MoneyPayerPanel.SetActive(true);
+                MoneyPayer.ShowMoney();
+                Bank.AddMoney(host, MoneyPayer.RequiredMoney);
+            }
+            else // противник платить
+            {
+                var payment = MoneyPayer.RequiredMoney;
+                Bank.TakeMoney(guest, payment);
+                Bank.AddMoney(host, payment);
+            }
+        }
+        else if (winner == guest)
+        {
+            MoneyPayer.RequiredMoney = MatchPaymentSum(hostClub);
+            if (host.Opponent == null) // наш гравець платить
+            {
+                MoneyPayer.MoneyPayerObject.SetActive(true);
+                MoneyPayer.MoneyPayerPanel.SetActive(true);
+                MoneyPayer.ShowMoney();
+                Bank.AddMoney(guest, MoneyPayer.RequiredMoney);
+            }
+            else // противник платить
+            {
+                var payment = MoneyPayer.RequiredMoney;
+                Bank.TakeMoney(host, payment);
+                Bank.AddMoney(guest, payment);
+            }
+        }
+        guestClub.IsPlayable = false;
+    }
+
     private void ShowPropertyWithChoiceToBuy(Cell cell)
     {
         // Гравець → показуємо панель з інформацією
@@ -225,5 +430,20 @@ public class CellActionManager : MonoBehaviour
             CellManager.ClosePropertyInfoPanel();
             PendingPurchase = null;
         });
+    }
+
+    private int MatchPaymentSum(Club club)
+    {
+        var sum = club.IncomeWithPlayer;
+        if (club.Trainer != null)
+        {
+            sum += club.IncomeWithTrainer;
+            if (club.Manager != null)
+            {
+                sum += club.IncomeWithManager;
+            }
+        }
+
+        return sum;
     }
 }

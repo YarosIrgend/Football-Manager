@@ -1,6 +1,6 @@
-﻿public class Footballer
+﻿[System.Serializable]
+public class Footballer
 {
     public int Points;
     public int Price;
-    public Club Club;
 }
