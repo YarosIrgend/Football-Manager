@@ -1,5 +1,5 @@
-﻿public class Manager
+﻿[System.Serializable]
+public class Manager : ClubMember
 {
-    public int Price;
-    public Club Club;
+    
 }

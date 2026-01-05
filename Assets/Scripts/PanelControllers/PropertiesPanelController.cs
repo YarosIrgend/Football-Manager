@@ -1,5 +1,6 @@
 ﻿// загально для клубів та телекомпаній
 
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,11 +10,25 @@ public class PropertiesPanelController : MonoBehaviour
     public GameObject ClubsPlane;
     public GameObject TelecompaniesPlane;
 
-    public GameObject ClubsPanel; // спільний для клубів та теле-ній 
+    [Header("General panels")] public GameObject ClubsPanel; // спільний для клубів та теле-ній 
     public Transform ClubsContent;
     public GameObject ClubCardPrefab;
-
     public GameObject ClubInfoPanel;
+
+    [Header("Transfer panels")] public GameObject ClubsPanelForTransfer;
+    public Transform ClubsContentForTransfer;
+    public GameObject ClubInfoPanelForTransfer;
+    public GameObject LastOpenedPanel;
+
+    private Club selectedClub;
+    public Action<Footballer, Club> OnBuyFootballerToClub;
+    public Action<Trainer, Club> OnBuyTrainerToClub;
+    public Action<Manager, Club> OnBuyManagerToClub;
+    public ClubMember pendingMember;
+
+    [Header("Buttons")]
+    public Button BuyButton;
+    public Button SellButton;
 
     public void CloseClubsPanel()
     {
@@ -28,6 +43,15 @@ public class PropertiesPanelController : MonoBehaviour
         ClearClubInfo();
     }
 
+    public void CloseClubsForTransferPanel()
+    {
+        var scrollView = ClubsPanelForTransfer.transform.Find("Scroll View").gameObject;
+        scrollView.SetActive(false);
+        ClubsPanelForTransfer.SetActive(false);
+        LastOpenedPanel.SetActive(true);
+    }
+    
+    
     # region Clubs
 
     public void ShowClubsPanel(Player player)
@@ -129,7 +153,168 @@ public class PropertiesPanelController : MonoBehaviour
     }
 
     # endregion
+
+    # region Clubs for Transfers
+
+    public void ShowClubsPanelForTransfer(Player player, ClubMember member, GameObject lastPanel)
+    {
+        pendingMember = member; // запам'ятати футболіста/тренера/менеджера для покупки
+        LastOpenedPanel = lastPanel; // фіксуємо, яку панель відкрити після закриття тої
+
+        // Закрити інші панелі
+        ClubInfoPanelForTransfer.SetActive(false);
+        ClubsPanelForTransfer.SetActive(false);
+
+        var scrollView = ClubsPanelForTransfer.transform.Find("Scroll View").gameObject;
+        scrollView.SetActive(false);
+
+        ClubsPanelForTransfer.SetActive(true);
+
+        ShowClubsForTransfer(player);
+    }
+
+    private void ShowClubsForTransfer(Player player)
+    {
+        ClearClubsForTransfer();
+
+        var scrollView = ClubsPanelForTransfer.transform.Find("Scroll View").gameObject;
+        scrollView.SetActive(true);
+
+        if (player.Clubs.Count >= 5)
+        {
+            var scrollBar = scrollView.transform.Find("Scrollbar").gameObject;
+            scrollBar.SetActive(true);
+        }
+
+        foreach (var club in player.Clubs)
+        {
+            GameObject card = Instantiate(ClubCardPrefab, ClubsContentForTransfer);
+            card.name = club.Name;
+            card.SetActive(true);
+
+            var image = card.GetComponent<Image>();
+            image.sprite = Resources.Load<Sprite>(club.ImagePath);
+
+            var clickable = card.GetComponent<PropertyClickable>();
+            clickable.Init(player, _ => ShowClubInfoForTransfer(club));
+        }
+    }
+
+    private void ShowClubInfoForTransfer(Club club)
+    {
+        selectedClub = club;
+        ClubInfoPanelForTransfer.SetActive(true);
+
+        GameObject card = Instantiate(ClubCardPrefab, ClubInfoPanelForTransfer.transform);
+        card.name = "Image";
+        card.SetActive(true);
+
+        var image = card.GetComponent<Image>();
+        image.sprite = Resources.Load<Sprite>(club.ImagePath);
+
+        var rt = card.GetComponent<RectTransform>();
+        rt.sizeDelta = new Vector2(400f, 400f);
+
+        SetClubDataForTransfer(club);
+    }
+
+    private void SetClubDataForTransfer(Club club)
+    {
+        Transform clubInfo = ClubInfoPanelForTransfer.transform.Find("ClubInfo");
+
+        CreateRow("NameRow", clubInfo, $"Назва:   {club.Name}");
+        CreateRow("PriceRow", clubInfo, $"Ціна:   {club.Price}");
+        CreateRow("IncomeWithPlayerRow", clubInfo, $"Дохід з гравцем:   {club.IncomeWithPlayer}");
+        CreateRow("IncomeWithTrainerRow", clubInfo, $"Дохід з тренером:   {club.IncomeWithTrainer}");
+        CreateRow("IncomeWithManagerRow", clubInfo, $"Дохід з менеджером:   {club.IncomeWithManager}");
+
+        CreateRow(
+            "FootballerRow",
+            clubInfo,
+            $"Футболіст: {(club.Footballer != null ? $"{club.Footballer.Points}-очковий" : "Немає")}"
+        );
+
+        CreateRow(
+            "TrainerRow",
+            clubInfo,
+            $"Тренер: {(club.Trainer != null ? $"{club.Trainer.Points}-очковий" : "Немає")}"
+        );
+
+        CreateRow(
+            "ManagerRow",
+            clubInfo,
+            $"Менеджер: {(club.Manager != null ? "Є" : "Немає")}"
+        );
+    }
+
+    private void ClearClubsForTransfer()
+    {
+        foreach (Transform child in ClubsContentForTransfer)
+            Destroy(child.gameObject);
+    }
+
+    public void CloseClubInfoPanelForTransfer()
+    {
+        TransferPanelController.Instance.TrainerPanel.SetActive(false);
+        var image = ClubInfoPanelForTransfer.transform.Find("Image");
+        if (image != null)
+            Destroy(image.gameObject);
+
+        var clubInfo = ClubInfoPanelForTransfer.transform.Find("ClubInfo");
+        foreach (Transform child in clubInfo)
+            Destroy(child.gameObject);
+
+        ClubInfoPanelForTransfer.SetActive(false);
+    }
     
+    public void BuySelectedMember()
+    {
+        if (pendingMember == null || selectedClub == null)
+            return;
+
+        switch (pendingMember)
+        {
+            case Footballer footballer:
+                OnBuyFootballerToClub?.Invoke(footballer, selectedClub);
+                break;
+            case Trainer trainer:
+                OnBuyTrainerToClub?.Invoke(trainer, selectedClub);
+                break;
+            case Manager manager:
+                OnBuyManagerToClub?.Invoke(manager, selectedClub);
+                break;
+        }
+
+        CloseClubInfoPanelForTransfer();
+    }
+
+    public void OnSellFootballerClicked()
+    {
+        if (selectedClub == null)
+            return;
+
+        TransferFlowController.Instance.SellFootballer(selectedClub);
+    }
+
+    public void OnSellTrainerClicked()
+    {
+        if (selectedClub == null)
+            return;
+
+        TransferFlowController.Instance.SellTrainer(selectedClub);
+    }
+
+    public void OnSellManagerClicked()
+    {
+        if (selectedClub == null)
+            return;
+
+        TransferFlowController.Instance.SellManager(selectedClub);
+    }
+    
+    
+    # endregion
+
     # region Telecompanies
 
     public void ShowTelecompaniesPanel(Player player)
@@ -151,7 +336,7 @@ public class PropertiesPanelController : MonoBehaviour
             textObj.SetActive(true);
             return;
         }
-        
+
         textObj.SetActive(false);
 
         ShowTelecompanies(player);
@@ -204,6 +389,8 @@ public class PropertiesPanelController : MonoBehaviour
     }
 
     # endregion
+
+    # region Helpers
 
     private void CreateRow(string rowName, Transform parent, string text)
     {
@@ -268,4 +455,6 @@ public class PropertiesPanelController : MonoBehaviour
         foreach (Transform child in ClubsContent)
             Destroy(child.gameObject);
     }
+
+    # endregion
 }

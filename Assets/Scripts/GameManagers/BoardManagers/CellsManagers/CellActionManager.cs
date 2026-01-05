@@ -52,6 +52,7 @@ public class CellActionManager : MonoBehaviour
                 break;
 
             case CellType.Transfer:
+                yield return HandleTransferCoroutine(game, player, r => completed = r);
                 break;
 
             case CellType.Disqualification:
@@ -120,6 +121,8 @@ public class CellActionManager : MonoBehaviour
             else
             {
                 // Противник → автоматична обробка
+                Bank.TakeMoney(player, club.Price);
+                player.Clubs.Add(club);
                 onCompleted(true);
             }
         }
@@ -188,12 +191,32 @@ public class CellActionManager : MonoBehaviour
             }
             else
             {
-                // Противник → автоматична обробка
+                Bank.TakeMoney(player, telecompany.Price);
+                player.Telecompanies.Add(telecompany);
                 onCompleted(true);
             }
         }
     }
 
+    private IEnumerator HandleTransferCoroutine(Game game, Player player, Action<bool> onCompleted)
+    {
+        // AI — автоматично пропускає
+        if (player.Opponent != null)
+        {
+            onCompleted(true);
+            yield break;
+        }
+
+        bool finished = false;
+
+        TransferFlowController.Instance.StartTransfer(game, player, () => finished = true);
+
+        while (!finished)
+            yield return null;
+
+        onCompleted(true);
+    }
+    
     private IEnumerator HandleBonusCoroutine(Player player, Game game)
     {
         var bonus = game.Bonuses.GetRandomItem();
@@ -211,7 +234,7 @@ public class CellActionManager : MonoBehaviour
         MessagePanelController.Instance.Show($"Штраф: {fine.Value}");
         yield return new WaitForSeconds(1.5f);
 
-        if (player.Opponent == null)
+        if (player.Opponent == null) // наш гравець платить
         {
             MoneyPayer.RequiredMoney = fine.Value;
             MoneyPayer.MoneyPayerObject.SetActive(true);
@@ -219,7 +242,7 @@ public class CellActionManager : MonoBehaviour
             MoneyPayer.ShowMoney();
             onCompleted(false);
         }
-        else
+        else // противник платить
         {
             Bank.TakeMoney(player, fine.Value);
             onCompleted(true);

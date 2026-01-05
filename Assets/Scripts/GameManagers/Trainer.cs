@@ -1,6 +1,5 @@
 ﻿[System.Serializable]
-public class Trainer
+public class Trainer : ClubMember
 {
     public int Points;
-    public int Price;
 }   

@@ -29,20 +29,12 @@ public class MessagePanelController : MonoBehaviour
     private IEnumerator ShowRoutine(string message, float duration)
     {
         MessagePanel.SetActive(true);
+        MessagePanel.transform.SetAsLastSibling();
         var text = MessagePanel.transform.Find("Message").GetComponent<TextMeshProUGUI>();
 
         text.text = message;
 
         yield return new WaitForSeconds(duration);
-
-        MessagePanel.SetActive(false);
-        currentCoroutine = null;
-    }
-
-    public void HideImmediately()
-    {
-        if (currentCoroutine != null)
-            StopCoroutine(currentCoroutine);
 
         MessagePanel.SetActive(false);
         currentCoroutine = null;

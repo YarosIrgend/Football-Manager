@@ -147,7 +147,7 @@ public class GameManager : MonoBehaviour
             yield break;
         }
 
-        int cells = 24;
+        int cells = 10;
         //int cells = ThrowDices();
         MessagePanelController.Instance.Show($"Випало: {cells}");
         yield return new WaitForSeconds(1.5f);
