@@ -21,52 +21,6 @@ public class Bank : MonoBehaviour
         new Banknote { Value = 100_000 }
     };
     
-    // використати для визначення які купюри були надані для оплати і які надати гравцю, якому платять 
-    // public List<BanknoteGroup> GivenMoney = new()
-    // {
-    //     new BanknoteGroup
-    //     {
-    //         Banknote = new Banknote { Value = 5_000_000 },
-    //         Amount = 0
-    //     },
-    //     new BanknoteGroup
-    //     {
-    //         Banknote = new Banknote { Value = 2_000_000 },
-    //         Amount = 0
-    //     },
-    //     new BanknoteGroup
-    //     {
-    //         Banknote = new Banknote { Value = 1_000_000 },
-    //         Amount = 0
-    //     },
-    //     new BanknoteGroup
-    //     {
-    //         Banknote = new Banknote { Value = 500_000 },
-    //         Amount = 0
-    //     },
-    //     new BanknoteGroup
-    //     {
-    //         Banknote = new Banknote { Value = 200_000 },
-    //         Amount = 0
-    //     },
-    //     new BanknoteGroup
-    //     {
-    //         Banknote = new Banknote { Value = 100_000 },
-    //         Amount = 0
-    //     }
-    // };
-    //
-    // public int GivenMoneySum =>
-    //     GivenMoney.Sum(g => g.Banknote.Value * g.Amount);
-    //
-    // public void GivenMoneyReset()
-    // {
-    //     foreach (var group in GivenMoney)
-    //         group.Amount = 0;
-    // }
-
-    // Просте додавання грошей (бонуси, старт і т.д.)
-    
     public void AddMoney(Player player, int money)
     {
         while (money > 0)

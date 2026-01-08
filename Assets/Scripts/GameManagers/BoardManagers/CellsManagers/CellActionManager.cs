@@ -82,8 +82,12 @@ public class CellActionManager : MonoBehaviour
 
         // визначити, чи хтось володіє клубом, якщо так треба матч провести (якщо клуби є)
         var owner = game.Players.FirstOrDefault(p => p.Clubs.Any(tc => tc.Name == club!.Name));
-        if (owner != null && owner != player)
+        if (owner != null)
         {
+            if (owner == player)
+            {
+                yield break;
+            }
             MessagePanelController.Instance.Show(
                 $"Є гравець {owner.ColorString}, який володіє цим клубом.");
             yield return new WaitForSeconds(1.5f);
@@ -107,10 +111,10 @@ public class CellActionManager : MonoBehaviour
 
                 if (BuyChoice)
                 {
-                    MoneyPayer.RequiredMoney = club!.Price;
-                    MoneyPayer.MoneyPayerObject.SetActive(true);
-                    MoneyPayer.MoneyPayerPanel.SetActive(true);
-                    MoneyPayer.ShowMoney();
+                    MoneyPayer.SetPayment(club.Price);
+                    club.Footballer = null;
+                    club.Trainer = null;
+                    club.Manager = null;
                     onCompleted(false);
                 }
                 else
@@ -120,9 +124,32 @@ public class CellActionManager : MonoBehaviour
             }
             else
             {
-                // Противник → автоматична обробка
+                // рішення купити (обробити, якщо вирішив купити, то додати клуб)
+                bool wantBuy = player.Opponent.DecideBuyProperty(game, player, club);
+
+                if (!wantBuy)
+                {
+                    onCompleted(true);
+                    yield break;
+                }
+
+                // спроба знайти бабло
+                bool canPay = player.Opponent.TryResolveMoney(player, club.Price);
+
+                if (!canPay)
+                {
+                    onCompleted(true);
+                    yield break;
+                }
+        
                 Bank.TakeMoney(player, club.Price);
+                club.Footballer = null;
+                club.Trainer = null;
+                club.Manager = null;
                 player.Clubs.Add(club);
+                
+                MessagePanelController.Instance.Show($"Гравець {player.ColorString} купив клуб {club.Name}");
+                yield return new WaitForSeconds(1.5f);
                 onCompleted(true);
             }
         }
@@ -138,29 +165,40 @@ public class CellActionManager : MonoBehaviour
 
         // визначити, чи хтось володіє телекомпанією, якщо так треба платити
         var owner = game.Players.FirstOrDefault(p => p.Telecompanies.Any(tc => tc.Name == telecompany!.Name));
-        if (owner != null && owner != player)
+        if (owner != null)
         {
+            if (owner == player)
+            {
+                yield break;
+            }
+            
             MessagePanelController.Instance.Show(
                 $"Є гравець {owner.ColorString}, який володіє цією компанією. Усього: {owner.Telecompanies.Count}");
             yield return new WaitForSeconds(1.5f);
-            MoneyPayer.RequiredMoney = owner.Telecompanies.Count switch
+            
+            if (telecompany.IsMortgaged)
+            {
+                MessagePanelController.Instance.Show("Телекомпанія закладена");
+                yield return new WaitForSeconds(1.5f);
+                yield break;
+            }
+            
+            var payment = owner.Telecompanies.Count switch
             {
                 1 => 300_000,
                 2 => 500_000,
                 3 => 1_000_000,
                 _ => 2_000_000
             };
+
             if (player.Opponent == null) // наш гравець платить
             {
-                MoneyPayer.MoneyPayerObject.SetActive(true);
-                MoneyPayer.MoneyPayerPanel.SetActive(true);
-                MoneyPayer.ShowMoney();
+                MoneyPayer.SetPayment(payment);
                 Bank.AddMoney(owner, MoneyPayer.RequiredMoney);
                 onCompleted(false);
             }
             else // противник платить
             {
-                var payment = MoneyPayer.RequiredMoney;
                 Bank.TakeMoney(player, payment);
                 Bank.AddMoney(owner, payment);
             }
@@ -178,10 +216,7 @@ public class CellActionManager : MonoBehaviour
 
                 if (BuyChoice)
                 {
-                    MoneyPayer.RequiredMoney = telecompany!.Price;
-                    MoneyPayer.MoneyPayerObject.SetActive(true);
-                    MoneyPayer.MoneyPayerPanel.SetActive(true);
-                    MoneyPayer.ShowMoney();
+                    MoneyPayer.SetPayment(telecompany.Price);
                     onCompleted(false);
                 }
                 else
@@ -191,8 +226,26 @@ public class CellActionManager : MonoBehaviour
             }
             else
             {
+                bool wantBuy = player.Opponent.DecideBuyProperty(game, player, telecompany);
+
+                if (!wantBuy)
+                {
+                    onCompleted(true);
+                    yield break;
+                }
+
+                bool canPay = player.Opponent.TryResolveMoney(player, telecompany.Price);
+
+                if (!canPay)
+                {
+                    onCompleted(true);
+                    yield break;
+                }
+
                 Bank.TakeMoney(player, telecompany.Price);
                 player.Telecompanies.Add(telecompany);
+                MessagePanelController.Instance.Show($"Гравець {player.ColorString} купив телекомпанію {telecompany.Name}");
+                yield return new WaitForSeconds(1.5f);
                 onCompleted(true);
             }
         }
@@ -200,9 +253,12 @@ public class CellActionManager : MonoBehaviour
 
     private IEnumerator HandleTransferCoroutine(Game game, Player player, Action<bool> onCompleted)
     {
-        // AI — автоматично пропускає
+        // рішення купити (обробити, якщо вирішив купити, то додати когось, кого він хоче)
+        // але за правилами, що спочатку в клуб може купитися футболіст, потім тренер, потім менеджер за бажанням
+        
         if (player.Opponent != null)
         {
+            player.Opponent.HandleTransfer(player);
             onCompleted(true);
             yield break;
         }
@@ -244,7 +300,11 @@ public class CellActionManager : MonoBehaviour
         }
         else // противник платить
         {
-            Bank.TakeMoney(player, fine.Value);
+            bool canPay = player.Opponent.TryResolveMoney(player, fine.Value);
+
+            if (canPay)
+                Bank.TakeMoney(player, fine.Value);
+
             onCompleted(true);
         }
     }
@@ -258,10 +318,7 @@ public class CellActionManager : MonoBehaviour
 
         if (player.Opponent == null)
         {
-            MoneyPayer.RequiredMoney = tax;
-            MoneyPayer.MoneyPayerObject.SetActive(true);
-            MoneyPayer.MoneyPayerPanel.SetActive(true);
-            MoneyPayer.ShowMoney();
+            MoneyPayer.SetPayment(tax);
             onCompleted(false);
         }
         else
@@ -306,17 +363,14 @@ public class CellActionManager : MonoBehaviour
             MessagePanelController.Instance.Show($"Технічна поразка, оплата {MatchPaymentSum(hostClub)}");
             yield return new WaitForSeconds(1.5f);
 
-            MoneyPayer.RequiredMoney = MatchPaymentSum(hostClub);
+            var payment = MatchPaymentSum(hostClub);
             if (guest.Opponent == null) // наш гравець платить
             {
-                MoneyPayer.MoneyPayerObject.SetActive(true);
-                MoneyPayer.MoneyPayerPanel.SetActive(true);
-                MoneyPayer.ShowMoney();
+                MoneyPayer.SetPayment(payment);
                 Bank.AddMoney(host, MoneyPayer.RequiredMoney);
             }
             else // противник платить
             {
-                var payment = MoneyPayer.RequiredMoney;
                 Bank.TakeMoney(guest, payment);
                 Bank.AddMoney(host, payment);
             }

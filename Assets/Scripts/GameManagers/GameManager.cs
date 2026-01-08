@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -33,7 +32,7 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         //Game.GameSettings = MatchSettingsController.GameSettings;
-        Game.GameSettings = new GameSettings { Difficulty = Difficulty.Easy, PlayerCount = 3, ChipColor = Color.blue };
+        Game.GameSettings = new GameSettings { Difficulty = Difficulty.Easy, PlayerCount = 2, ChipColor = Color.blue };
         BoardManager.GenerateSnapPoints();
         InitializeGame();
         PropertyManager.SetPlayers(Game.Players);
@@ -147,16 +146,14 @@ public class GameManager : MonoBehaviour
             yield break;
         }
 
-        int cells = 10;
-        //int cells = ThrowDices();
+        //int cells = 10;
+        int cells = ThrowDices();
         MessagePanelController.Instance.Show($"Випало: {cells}");
         yield return new WaitForSeconds(1.5f);
 
-        yield return StartCoroutine(MovePlayerChipCoroutine(cells));
-
         EndTurnButton.SetActive(true);
+        yield return StartCoroutine(MovePlayerChipCoroutine(cells));
     }
-
 
     public void EndPlayerTurn()
     {
@@ -214,7 +211,7 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator OpponentTurnCoroutine()
     {
-        var cells = 1;
+        var cells = ThrowDices();
 
         MessagePanelController.Instance.Show($"Випало: {cells}");
         yield return new WaitForSeconds(1.5f);
@@ -248,6 +245,12 @@ public class GameManager : MonoBehaviour
         BoardManager.MovePlayerChip(CurrentPlayer.ChipBehaviour, cells);
         var newCell = CurrentPlayer.ChipBehaviour.CurrentCell;
 
+        // старт
+        if (StartCellPassed(currentCell, newCell))
+        {
+            Bank.AddMoney(CurrentPlayer, 500_000);
+        }
+
         // дія клітинки
         yield return StartCoroutine(
             CellActionManager.DoActionAccordingCellCoroutine(
@@ -257,12 +260,6 @@ public class GameManager : MonoBehaviour
                 completed => AreTurnConditionsCompleted = completed
             )
         );
-
-        // старт
-        if (StartCellPassed(currentCell, newCell))
-        {
-            Bank.AddMoney(CurrentPlayer, 500_000);
-        }
     }
 
     # endregion

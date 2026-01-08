@@ -75,8 +75,7 @@ public class TransferFlowController : MonoBehaviour
         TransferPanelController.FootballerPanel.SetActive(false);
 
         PropertiesPanelController.pendingMember = footballer;
-        PropertiesPanelController.ShowClubsPanelForTransfer(CurrentPlayer, footballer,
-            TransferPanelController.FootballerPanel);
+        
         PropertiesPanelController.BuyButton.gameObject.SetActive(true);
         
         PropertiesPanelController.OnBuyFootballerToClub = (f, club) =>
@@ -86,8 +85,15 @@ public class TransferFlowController : MonoBehaviour
                 MessagePanelController.Instance.Show("В цьому клубі є футболіст");
                 return;
             }
+            MoneyPayer.RequiredMoney = footballer.Price;
+            MoneyPayer.MoneyPayerObject.SetActive(true);
+            MoneyPayer.MoneyPayerPanel.SetActive(true);
+            MoneyPayer.ShowMoney();
             club.Footballer = f;
         };
+        
+        PropertiesPanelController.ShowClubsPanelForTransfer(CurrentPlayer, footballer,
+            TransferPanelController.FootballerPanel);
     }
 
     public void OnTrainerBuy(Trainer trainer)
@@ -126,6 +132,10 @@ public class TransferFlowController : MonoBehaviour
                 MessagePanelController.Instance.Show("В цьому клубі є тренер");
                 return;
             }
+            MoneyPayer.RequiredMoney = trainer.Price;
+            MoneyPayer.MoneyPayerObject.SetActive(true);
+            MoneyPayer.MoneyPayerPanel.SetActive(true);
+            MoneyPayer.ShowMoney();
             club.Trainer = t;
         };
     }
@@ -164,6 +174,11 @@ public class TransferFlowController : MonoBehaviour
                 MessagePanelController.Instance.Show("В цьому клубі є менеджер");
                 return;
             }
+            
+            MoneyPayer.RequiredMoney = manager.Price;
+            MoneyPayer.MoneyPayerObject.SetActive(true);
+            MoneyPayer.MoneyPayerPanel.SetActive(true);
+            MoneyPayer.ShowMoney();
             club.Manager = m;
         };
     }
@@ -205,5 +220,4 @@ public class TransferFlowController : MonoBehaviour
         Bank.AddMoney(CurrentPlayer, club.Manager.Price);
         club.Manager = null;
     }
-    
 }

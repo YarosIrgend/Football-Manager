@@ -67,7 +67,10 @@ public class BoardManager : MonoBehaviour
             Chip chip = chipGo.GetComponent<Chip>();
             if (chip == null)
                 chip = chipGo.AddComponent<Chip>();
-
+            
+            chip.GetComponent<Rigidbody>().isKinematic = true;
+            chip.GetComponent<Rigidbody>().useGravity = false;
+                
             chip.Color = player.ChipColor;
             player.ChipBehaviour = chip;
 

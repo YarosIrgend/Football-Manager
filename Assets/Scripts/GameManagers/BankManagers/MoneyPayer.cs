@@ -89,4 +89,12 @@ public class MoneyPayer : MonoBehaviour
         MoneyPayerPanel.SetActive(true);
         ShowMoney();
     }
+
+    public void SetPayment(int sum)
+    {
+        RequiredMoney = sum;
+        MoneyPayerObject.SetActive(true);
+        MoneyPayerPanel.SetActive(true);
+        ShowMoney();
+    }
 }

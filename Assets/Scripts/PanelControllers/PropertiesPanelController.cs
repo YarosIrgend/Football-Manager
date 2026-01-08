@@ -1,12 +1,17 @@
 ﻿// загально для клубів та телекомпаній
 
 using System;
+using System.Collections;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class PropertiesPanelController : MonoBehaviour
 {
+    [Header("Dependencies")] public Bank Bank;
+    public MoneyPayer MoneyPayer;
+
     public GameObject ClubsPlane;
     public GameObject TelecompaniesPlane;
 
@@ -20,15 +25,22 @@ public class PropertiesPanelController : MonoBehaviour
     public GameObject ClubInfoPanelForTransfer;
     public GameObject LastOpenedPanel;
 
-    private Club selectedClub;
     public Action<Footballer, Club> OnBuyFootballerToClub;
     public Action<Trainer, Club> OnBuyTrainerToClub;
     public Action<Manager, Club> OnBuyManagerToClub;
+    private Club selectedClub;
+    private Property selectedProperty;
+    private Player selectedPlayer;
+
     public ClubMember pendingMember;
 
-    [Header("Buttons")]
-    public Button BuyButton;
+    [Header("Buttons")] public Button BuyButton;
     public Button SellButton;
+    public Button SellPropertyButton;
+    public Button MortgagePropertyButton;
+    public Button RedeemPropertyButton;
+
+    # region Buttons
 
     public void CloseClubsPanel()
     {
@@ -41,6 +53,8 @@ public class PropertiesPanelController : MonoBehaviour
     {
         ClubInfoPanel.SetActive(false);
         ClearClubInfo();
+        SellPropertyButton.onClick.RemoveAllListeners();
+        MortgagePropertyButton.onClick.RemoveAllListeners();
     }
 
     public void CloseClubsForTransferPanel()
@@ -50,8 +64,82 @@ public class PropertiesPanelController : MonoBehaviour
         ClubsPanelForTransfer.SetActive(false);
         LastOpenedPanel.SetActive(true);
     }
+
+    private IEnumerator SellPropertyCoroutine()
+    {
+        switch (selectedProperty)
+        {
+            case Club club:
+                selectedPlayer.Clubs.Remove(club);
+                if (!club.IsMortgaged)
+                {
+                    Bank.AddMoney(selectedPlayer, club.Price);
+                }
+                else
+                {
+                    Bank.AddMoney(selectedPlayer, club.Price / 2);
+                }
+
+                break;
+            case Telecompany telecompany:
+                selectedPlayer.Telecompanies.Remove(telecompany);
+                if (!telecompany.IsMortgaged)
+                {
+                    Bank.AddMoney(selectedPlayer, telecompany.Price);
+                }
+                else
+                {
+                    Bank.AddMoney(selectedPlayer, telecompany.Price / 2);
+                }
+
+                break;
+        }
+        MessagePanelController.Instance.Show("Продано");
+        yield return new WaitForSeconds(1.5f);
+        CloseClubInfoPanel();
+        CloseClubsPanel();
+    }
+
+    private IEnumerator MortgagePropertyCoroutine()
+    {
+        switch (selectedProperty)
+        {
+            case Club club:
+                club.IsMortgaged = true;
+                Bank.AddMoney(selectedPlayer, club.Price / 2);
+                break;
+            case Telecompany telecompany:
+                telecompany.IsMortgaged = true;
+                Bank.AddMoney(selectedPlayer, telecompany.Price / 2);
+                break;
+        }
+        MessagePanelController.Instance.Show("Закладено");
+        yield return new WaitForSeconds(1.5f);
+        CloseClubInfoPanel();
+    }
     
-    
+    private void SellProperty()
+    {
+        StartCoroutine(SellPropertyCoroutine());
+    }
+
+    private void MortgageProperty()
+    {
+        StartCoroutine(MortgagePropertyCoroutine());
+    }
+
+    private void RedeemProperty()
+    {
+        CloseClubInfoPanel();
+        CloseClubsPanel();
+        var propertyPanel = GetObject("PropertyPanel");
+        propertyPanel.SetActive(false);
+        MoneyPayer.SetPayment(selectedProperty.Price / 2);
+        selectedProperty.IsMortgaged = false;
+    }
+
+    # endregion
+
     # region Clubs
 
     public void ShowClubsPanel(Player player)
@@ -100,11 +188,11 @@ public class PropertiesPanelController : MonoBehaviour
             image.sprite = Resources.Load<Sprite>(club.ImagePath);
 
             var clickable = card.GetComponent<PropertyClickable>();
-            clickable.Init(player, _ => ShowClubInfo(club));
+            clickable.Init(player, _ => ShowClubInfo(club, player));
         }
     }
 
-    private void ShowClubInfo(Club club)
+    private void ShowClubInfo(Club club, Player player)
     {
         ClubInfoPanel.SetActive(true);
 
@@ -116,11 +204,37 @@ public class PropertiesPanelController : MonoBehaviour
         var rt = card.GetComponent<RectTransform>(); // розмір
         rt.sizeDelta = new Vector2(400f, 400f);
 
-        SetClubData(club);
+        SetClubData(club, player);
     }
 
-    private void SetClubData(Club club)
+    private void SetClubData(Club club, Player player)
     {
+        if (player.Opponent == null)
+        {
+            selectedProperty = club;
+            selectedPlayer = player;
+            SellPropertyButton.gameObject.SetActive(true);
+            SellPropertyButton.onClick.AddListener(SellProperty);
+            if (!club.IsMortgaged)
+            {
+                RedeemPropertyButton.gameObject.SetActive(false);
+                MortgagePropertyButton.gameObject.SetActive(true);
+                MortgagePropertyButton.onClick.AddListener(MortgageProperty);
+            }
+            else
+            {
+                MortgagePropertyButton.gameObject.SetActive(false);
+                RedeemPropertyButton.gameObject.SetActive(true);
+                RedeemPropertyButton.onClick.AddListener(RedeemProperty);
+            }
+        }
+        else
+        {
+            SellPropertyButton.gameObject.SetActive(false);
+            MortgagePropertyButton.gameObject.SetActive(false);
+            RedeemPropertyButton.gameObject.SetActive(false);
+        }
+
         Transform clubInfo = ClubInfoPanel.transform.Find("ClubInfo");
 
         CreateRow("NameRow", clubInfo, $"Назва:   {club.Name}");
@@ -266,7 +380,7 @@ public class PropertiesPanelController : MonoBehaviour
 
         ClubInfoPanelForTransfer.SetActive(false);
     }
-    
+
     public void BuySelectedMember()
     {
         if (pendingMember == null || selectedClub == null)
@@ -311,8 +425,7 @@ public class PropertiesPanelController : MonoBehaviour
 
         TransferFlowController.Instance.SellManager(selectedClub);
     }
-    
-    
+
     # endregion
 
     # region Telecompanies
@@ -358,11 +471,11 @@ public class PropertiesPanelController : MonoBehaviour
             image.sprite = Resources.Load<Sprite>(telecompany.ImagePath);
 
             var clickable = card.GetComponent<PropertyClickable>();
-            clickable.Init(player, _ => ShowTelecompanyInfo(telecompany));
+            clickable.Init(player, _ => ShowTelecompanyInfo(telecompany, player));
         }
     }
 
-    private void ShowTelecompanyInfo(Telecompany telecompany)
+    private void ShowTelecompanyInfo(Telecompany telecompany, Player player)
     {
         ClubInfoPanel.SetActive(true);
 
@@ -374,11 +487,37 @@ public class PropertiesPanelController : MonoBehaviour
         var rt = card.GetComponent<RectTransform>(); // розмір
         rt.sizeDelta = new Vector2(400f, 400f);
 
-        SetTelecompanyData(telecompany);
+        SetTelecompanyData(telecompany, player);
     }
 
-    private void SetTelecompanyData(Telecompany telecompany)
+    private void SetTelecompanyData(Telecompany telecompany, Player player)
     {
+        if (player.Opponent == null)
+        {
+            selectedProperty = telecompany;
+            selectedPlayer = player;
+            SellPropertyButton.gameObject.SetActive(true);
+            SellPropertyButton.onClick.AddListener(SellProperty);
+            if (!telecompany.IsMortgaged)
+            {
+                RedeemPropertyButton.gameObject.SetActive(false);
+                MortgagePropertyButton.gameObject.SetActive(true);
+                MortgagePropertyButton.onClick.AddListener(MortgageProperty);
+            }
+            else
+            {
+                MortgagePropertyButton.gameObject.SetActive(false);
+                RedeemPropertyButton.gameObject.SetActive(true);
+                RedeemPropertyButton.onClick.AddListener(RedeemProperty);
+            }
+        }
+        else
+        {
+            SellPropertyButton.gameObject.SetActive(false);
+            MortgagePropertyButton.gameObject.SetActive(false);
+            RedeemPropertyButton.gameObject.SetActive(false);
+        }
+
         // CLubInfo є спільним для клубів та теле-ній
         Transform telecompanyInfo = ClubInfoPanel.transform.Find("ClubInfo");
 
@@ -391,6 +530,33 @@ public class PropertiesPanelController : MonoBehaviour
     # endregion
 
     # region Helpers
+
+    private GameObject GetObject(string name)
+    {
+        foreach (var root in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects())
+        {
+            var result = FindInChildrenRecursive(root.transform, name);
+            if (result != null)
+                return result;
+        }
+
+        return null;
+    }
+
+    private GameObject FindInChildrenRecursive(Transform parent, string name)
+    {
+        if (parent.name == name)
+            return parent.gameObject;
+
+        foreach (Transform child in parent)
+        {
+            var found = FindInChildrenRecursive(child, name);
+            if (found != null)
+                return found;
+        }
+
+        return null;
+    }
 
     private void CreateRow(string rowName, Transform parent, string text)
     {
