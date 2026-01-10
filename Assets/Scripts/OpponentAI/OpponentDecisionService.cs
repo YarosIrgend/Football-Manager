@@ -25,7 +25,7 @@ public class OpponentDecisionService
         if (self.MoneySum >= requiredMoney)
             return true;
 
-        // 1️⃣ пробуємо заставу
+        // пробуємо заставу
         foreach (var p in GetAllProperties(self))
         {
             if (!p.IsMortgaged)
@@ -38,7 +38,7 @@ public class OpponentDecisionService
             }
         }
 
-        // 2️⃣ продаємо найдешевше
+        // продаємо найдешевше
         var sellable = GetAllProperties(self)
             .OrderBy(p => p.Price)
             .FirstOrDefault();

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Linq;
-using UnityEditor.VersionControl;
 using UnityEngine;
 
 public class CellActionManager : MonoBehaviour
@@ -116,6 +115,7 @@ public class CellActionManager : MonoBehaviour
                     club.Trainer = null;
                     club.Manager = null;
                     onCompleted(false);
+                    GameManager.MatchStatsData.clubsBought++;
                 }
                 else
                 {
@@ -199,6 +199,16 @@ public class CellActionManager : MonoBehaviour
             }
             else // противник платить
             {
+                bool canPay = player.Opponent.TryResolveMoney(player, payment);
+
+                if (!canPay)
+                {
+                    Bank.AddMoney(owner, player.MoneySum); // оплата, що лишилося у гравця, який платить
+                    yield return DeclareBankruptcy(player);
+                    onCompleted(true);
+                    yield break;
+                }
+                
                 Bank.TakeMoney(player, payment);
                 Bank.AddMoney(owner, payment);
             }
@@ -218,6 +228,7 @@ public class CellActionManager : MonoBehaviour
                 {
                     MoneyPayer.SetPayment(telecompany.Price);
                     onCompleted(false);
+                    GameManager.MatchStatsData.telecompaniesBought++;
                 }
                 else
                 {
@@ -302,10 +313,16 @@ public class CellActionManager : MonoBehaviour
         {
             bool canPay = player.Opponent.TryResolveMoney(player, fine.Value);
 
-            if (canPay)
-                Bank.TakeMoney(player, fine.Value);
+            if (!canPay)
+            {
+                yield return DeclareBankruptcy(player);
+                onCompleted(true);
+                yield break;
+            }
 
+            Bank.TakeMoney(player, fine.Value);
             onCompleted(true);
+
         }
     }
 
@@ -323,9 +340,19 @@ public class CellActionManager : MonoBehaviour
         }
         else
         {
+            bool canPay = player.Opponent.TryResolveMoney(player, tax);
+
+            if (!canPay)
+            {
+                yield return DeclareBankruptcy(player);
+                onCompleted(true);
+                yield break;
+            }
+
             Bank.TakeMoney(player, tax);
             onCompleted(true);
         }
+
     }
 
     private IEnumerator HandleDisqualificationCoroutine(Player player)
@@ -356,6 +383,7 @@ public class CellActionManager : MonoBehaviour
         var guestClub = guest.Clubs.FirstOrDefault(club => club.IsPlayable);
 
         // якщо вільного гостьового клубу нема, то технічна поразка
+        int payment;
         if (guestClub == null)
         {
             MessagePanelController.Instance.Show("У гостя нема клубів не в запасі");
@@ -363,7 +391,7 @@ public class CellActionManager : MonoBehaviour
             MessagePanelController.Instance.Show($"Технічна поразка, оплата {MatchPaymentSum(hostClub)}");
             yield return new WaitForSeconds(1.5f);
 
-            var payment = MatchPaymentSum(hostClub);
+            payment = MatchPaymentSum(hostClub);
             if (guest.Opponent == null) // наш гравець платить
             {
                 MoneyPayer.SetPayment(payment);
@@ -371,6 +399,15 @@ public class CellActionManager : MonoBehaviour
             }
             else // противник платить
             {
+                bool canPay = guest.Opponent.TryResolveMoney(guest, payment);
+
+                if (!canPay)
+                {
+                    Bank.AddMoney(host, guest.MoneySum); // оплата, що лишилося у гравця, який платить
+                    yield return DeclareBankruptcy(guest);
+                    yield break;
+                }
+
                 Bank.TakeMoney(guest, payment);
                 Bank.AddMoney(host, payment);
             }
@@ -440,42 +477,58 @@ public class CellActionManager : MonoBehaviour
         }
 
         yield return new WaitForSeconds(1.5f);
-
+        
         if (winner == host)
         {
-            MoneyPayer.RequiredMoney = MatchPaymentSum(hostClub);
+            payment = MatchPaymentSum(hostClub);
             if (guest.Opponent == null) // наш гравець платить
             {
-                MoneyPayer.MoneyPayerObject.SetActive(true);
-                MoneyPayer.MoneyPayerPanel.SetActive(true);
-                MoneyPayer.ShowMoney();
+                MoneyPayer.SetPayment(payment);
                 Bank.AddMoney(host, MoneyPayer.RequiredMoney);
             }
             else // противник платить
             {
-                var payment = MoneyPayer.RequiredMoney;
+                bool canPay = guest.Opponent.TryResolveMoney(guest, payment);
+
+                if (!canPay)
+                {
+                    Bank.AddMoney(host, guest.MoneySum);
+                    yield return DeclareBankruptcy(guest);
+                    yield break;
+                }
+                
                 Bank.TakeMoney(guest, payment);
                 Bank.AddMoney(host, payment);
             }
         }
         else if (winner == guest)
         {
-            MoneyPayer.RequiredMoney = MatchPaymentSum(hostClub);
+            payment = MatchPaymentSum(guestClub);
             if (host.Opponent == null) // наш гравець платить
             {
-                MoneyPayer.MoneyPayerObject.SetActive(true);
-                MoneyPayer.MoneyPayerPanel.SetActive(true);
-                MoneyPayer.ShowMoney();
+                MoneyPayer.SetPayment(payment);
                 Bank.AddMoney(guest, MoneyPayer.RequiredMoney);
             }
             else // противник платить
             {
-                var payment = MoneyPayer.RequiredMoney;
+                bool canPay = host.Opponent.TryResolveMoney(host, payment);
+
+                if (!canPay)
+                {
+                    Bank.AddMoney(guest, guest.MoneySum);
+                    yield return DeclareBankruptcy(guest);
+                    yield break;
+                }
                 Bank.TakeMoney(host, payment);
                 Bank.AddMoney(guest, payment);
             }
         }
         guestClub.IsPlayable = false;
+        
+        if (winner is { Opponent: null })
+        {
+            GameManager.MatchStatsData.matchWins++;
+        }
     }
 
     private void ShowPropertyWithChoiceToBuy(Cell cell)
@@ -523,4 +576,28 @@ public class CellActionManager : MonoBehaviour
 
         return sum;
     }
+    
+    private IEnumerator DeclareBankruptcy(Player player)
+    {
+        player.IsBankrupt = true;
+        player.IsPlayable = false;
+
+        player.Clubs.Clear();
+        player.Telecompanies.Clear();
+
+        foreach (var group in player.Money)
+            group.Amount = 0;
+
+        MessagePanelController.Instance.Show(
+            $"Гравець {player.ColorString} банкрот і вибуває з гри"
+        );
+        yield return new WaitForSeconds(1.5f);
+
+        // 🔥 ЯКЩО ЦЕ НАШ ГРАВЕЦЬ — ГРА ЗАВЕРШЕНА
+        if (player.Opponent == null)
+        {
+            GameManager.EndGame(false); // програш
+        }
+    }
+
 }

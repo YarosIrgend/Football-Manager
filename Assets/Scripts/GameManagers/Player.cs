@@ -5,6 +5,7 @@ using UnityEngine;
 [System.Serializable]
 public class Player
 {
+    public bool IsBankrupt;
     public List<Club> Clubs;
     public List<Telecompany> Telecompanies;
     public Color ChipColor;

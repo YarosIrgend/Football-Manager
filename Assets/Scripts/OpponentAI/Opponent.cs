@@ -8,6 +8,11 @@ public abstract class Opponent
 
     private bool initialized;
 
+    private void Start()
+    {
+        Init();
+    }
+    
     public void Init()
     {
         if (initialized)

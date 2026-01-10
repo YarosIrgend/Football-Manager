@@ -66,7 +66,7 @@ public class StatsManager : MonoBehaviour
             case "losses": stats.losses += amount; break;
             case "income": stats.income += amount; break;
             case "expenses": stats.expenses += amount; break;
-            case "maxBudget": stats.maxBudget += amount; break;
+            case "maxBudget": stats.maxBudget = amount; break;
         }
 
         SaveStats();

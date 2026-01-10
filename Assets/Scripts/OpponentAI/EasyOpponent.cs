@@ -9,8 +9,6 @@ public class EasyOpponent : Opponent
 
     public override bool DecideBuyProperty(Game game, Player self, Property property)
     {
-        Init();
-
         if (RollMistake())
             return UnityEngine.Random.value > 0.5f;
 
@@ -19,14 +17,11 @@ public class EasyOpponent : Opponent
 
     public override bool TryResolveMoney(Player self, int requiredMoney)
     {
-        Init();
         return MoneyUtils.GetTotalMoney(self) >= requiredMoney;
     }
 
     public override void HandleTransfer(Player self)
     {
-        Init();
-
         var club = self.Clubs.FirstOrDefault(c => c.IsPlayable);
         if (club == null)
             return;

@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -8,27 +10,35 @@ using Random = UnityEngine.Random;
 public class GameManager : MonoBehaviour
 {
     [Header("Managers")] public BoardManager BoardManager;
+    public StatsManager StatsManager;
+    public MatchStatsData MatchStatsData;
     public PropertyManager PropertyManager;
     public CellActionManager CellActionManager;
 
-    [Header("Objects")] public Game Game;
+    [Header("Objects")] 
+    public Game Game;
 
     public Player CurrentPlayer; // поточний гравець, який ходить
     public int CurrentPlayerIndex; // індекс поточного гравця
     private bool AreTurnConditionsCompleted; // закінчити хід можна лише після виконання умов (оплати)
 
-    [Header("Buttons")] public GameObject MakeTurnButton;
+    [Header("Buttons")] 
+    public GameObject MakeTurnButton;
     public GameObject EndTurnButton;
     public GameObject CloseMessagePanelButton;
     public GameObject ClosePropertyInfoPanelButton;
 
-    [Header("Panels")] public GameObject PropertyInfoPanel;
+    [Header("Panels")] 
+    public GameObject PropertyInfoPanel;
+    public GameObject ResultsPanel; 
 
-    [Header("Other")] public GameObject CardPrefab;
+    [Header("Other")] 
+    public GameObject CardPrefab;
     public Bank Bank;
     public MoneyPayer MoneyPayer;
     public MessagePanelController MessagePanelController;
-
+    private Stopwatch gameTimer = new();
+    
     private void Start()
     {
         //Game.GameSettings = MatchSettingsController.GameSettings;
@@ -42,6 +52,8 @@ public class GameManager : MonoBehaviour
         SetBanknoteClickablesToExchanger();
         SetPlayerToMoneyPayer();
         SetBanknoteClickablesToPayer();
+        
+        gameTimer.Start();
     }
 
     private void InitializeGame()
@@ -204,6 +216,7 @@ public class GameManager : MonoBehaviour
             }
 
             yield return StartCoroutine(OpponentTurnCoroutine());
+            RemoveBankrupts();
         }
 
         MakeTurnButton.SetActive(true);
@@ -211,7 +224,8 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator OpponentTurnCoroutine()
     {
-        var cells = ThrowDices();
+        var cells = 8;
+        //var cells = ThrowDices();
 
         MessagePanelController.Instance.Show($"Випало: {cells}");
         yield return new WaitForSeconds(1.5f);
@@ -262,6 +276,47 @@ public class GameManager : MonoBehaviour
         );
     }
 
+    private void RemoveBankrupts()
+    {
+        var bankrupts = Game.Players
+            .Where(player => player.IsBankrupt)
+            .ToList();
+
+        if (bankrupts.Count == 0)
+            return;
+
+        foreach (var player in bankrupts)
+        {
+            Destroy(player.ChipBehaviour.gameObject);
+        }
+
+        Game.Players.RemoveAll(player => player.IsBankrupt);
+        
+        // наш гравець перемагає
+        if (Game.Players.Count == 1 && Game.Players[0].Opponent == null)
+        {
+            EndGame(true);
+        }
+    }
+    
+    public void EndGame(bool isWin)
+    {
+        Game.IsGameOver = true;
+        
+        StopAllCoroutines();
+        
+        gameTimer.Stop();
+         MatchStatsData.matchTime = gameTimer.Elapsed;
+        
+        MakeTurnButton.SetActive(false);
+        EndTurnButton.SetActive(false);
+
+        ResultsPanel.SetActive(true);
+
+        var text = ResultsPanel.GetComponentInChildren<TMP_Text>();
+        text.text = isWin ? "ВИ ПЕРЕМОГЛИ!" : "Банкрот!";
+    }
+    
     # endregion
 
     # region Bank

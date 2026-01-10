@@ -9,8 +9,6 @@ public class HardOpponent : Opponent
 
     public override bool DecideBuyProperty(Game game, Player self, Property property)
     {
-        Init();
-
         bool smartDecision = DecisionService.ShouldBuy(game, self, property);
 
         if (RollMistake())
@@ -18,19 +16,14 @@ public class HardOpponent : Opponent
 
         return smartDecision;
     }
-
-
+    
     public override bool TryResolveMoney(Player self, int requiredMoney)
     {
-        Init();
         return DecisionService.TryResolveMoney(self, requiredMoney);
     }
-
-
+    
     public override void HandleTransfer(Player self)
     {
-        Init();
-
         var club = self.Clubs.FirstOrDefault(c => c.IsPlayable);
         if (club == null)
             return;
