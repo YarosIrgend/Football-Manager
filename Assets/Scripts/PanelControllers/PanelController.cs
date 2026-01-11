@@ -15,10 +15,15 @@ public class PanelController : MonoBehaviour
     
     public void BackInPanel()
     {
-        GameObject currentPanel = OpenedPanels.Pop();
-        GameObject panelToBack = OpenedPanels.Peek();
-        currentPanel.SetActive(false);
-        panelToBack.SetActive(true);
+        if (OpenedPanels.Count <= 1)
+            return;
+
+        var current = OpenedPanels.Pop();
+        var previous = OpenedPanels.Peek();
+
+        current.SetActive(false);
+        previous.SetActive(true);
+        CurrentPanel = previous;
     }
 } 
 

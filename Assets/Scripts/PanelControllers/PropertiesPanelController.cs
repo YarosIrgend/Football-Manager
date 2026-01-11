@@ -11,6 +11,7 @@ public class PropertiesPanelController : MonoBehaviour
 {
     [Header("Dependencies")] public Bank Bank;
     public MoneyPayer MoneyPayer;
+    public StatsManager StatsManager;
 
     public GameObject ClubsPlane;
     public GameObject TelecompaniesPlane;
@@ -74,26 +75,35 @@ public class PropertiesPanelController : MonoBehaviour
                 if (!club.IsMortgaged)
                 {
                     Bank.AddMoney(selectedPlayer, club.Price);
+                    StatsManager.AddToStat("income", club.Price);
                 }
                 else
                 {
                     Bank.AddMoney(selectedPlayer, club.Price / 2);
+                    StatsManager.AddToStat("income", club.Price / 2);
                 }
 
                 break;
+
             case Telecompany telecompany:
                 selectedPlayer.Telecompanies.Remove(telecompany);
                 if (!telecompany.IsMortgaged)
                 {
                     Bank.AddMoney(selectedPlayer, telecompany.Price);
+                    StatsManager.AddToStat("income", telecompany.Price);
                 }
                 else
                 {
                     Bank.AddMoney(selectedPlayer, telecompany.Price / 2);
+                    StatsManager.AddToStat("income", telecompany.Price / 2);
                 }
 
                 break;
         }
+
+        if (StatsManager.GetStat("maxBudget") <= selectedPlayer.MoneySum)
+            StatsManager.AddToStat("maxBudget", selectedPlayer.MoneySum);
+
         MessagePanelController.Instance.Show("Продано");
         yield return new WaitForSeconds(1.5f);
         CloseClubInfoPanel();
@@ -107,17 +117,23 @@ public class PropertiesPanelController : MonoBehaviour
             case Club club:
                 club.IsMortgaged = true;
                 Bank.AddMoney(selectedPlayer, club.Price / 2);
+                StatsManager.AddToStat("income", club.Price);
                 break;
             case Telecompany telecompany:
                 telecompany.IsMortgaged = true;
                 Bank.AddMoney(selectedPlayer, telecompany.Price / 2);
+                StatsManager.AddToStat("income", telecompany.Price / 2);
                 break;
         }
+    
+        if (StatsManager.GetStat("maxBudget") <= selectedPlayer.MoneySum)
+            StatsManager.AddToStat("maxBudget", selectedPlayer.MoneySum);
+        
         MessagePanelController.Instance.Show("Закладено");
         yield return new WaitForSeconds(1.5f);
         CloseClubInfoPanel();
     }
-    
+
     private void SellProperty()
     {
         StartCoroutine(SellPropertyCoroutine());
@@ -136,6 +152,7 @@ public class PropertiesPanelController : MonoBehaviour
         propertyPanel.SetActive(false);
         MoneyPayer.SetPayment(selectedProperty.Price / 2);
         selectedProperty.IsMortgaged = false;
+        StatsManager.AddToStat("expenses", selectedProperty.Price / 2);
     }
 
     # endregion

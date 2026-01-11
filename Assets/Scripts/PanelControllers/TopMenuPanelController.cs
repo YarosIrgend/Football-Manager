@@ -7,6 +7,7 @@ public class TopMenuPanelController : PanelController
 {
     public bool isMoved;
     public GameObject TopMenuPanel;
+    public GameObject RulesPanel;
     public GameManager GameManager;
     public Button MoveButton;
     private TMP_Text moveButtonText;
@@ -19,7 +20,6 @@ public class TopMenuPanelController : PanelController
     public void ExitGame()
     {
         GameManager.EndGame(false);
-        //SceneManager.LoadScene("MainMenu");
     }
 
     public void MovePanel()
@@ -37,5 +37,15 @@ public class TopMenuPanelController : PanelController
             isMoved = false;
             moveButtonText.text = "Розгорнути";
         }
+    }
+
+    public void ShowRules()
+    {
+        RulesPanel.SetActive(true);
+    }
+
+    public void HideRules()
+    {
+        RulesPanel.SetActive(false);
     }
 }

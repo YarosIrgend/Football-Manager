@@ -213,9 +213,13 @@ public class CellActionManager : MonoBehaviour
                 
                 Bank.TakeMoney(player, payment);
                 Bank.AddMoney(owner, payment);
-                
-                if(owner.Opponent == null)
+
+                if (owner.Opponent == null)
+                {
                     GameManager.StatsManager.AddToStat("income", payment);
+                    if (GameManager.StatsManager.GetStat("maxBudget") <= owner.MoneySum)
+                        GameManager.StatsManager.AddToStat("maxBudget", owner.MoneySum);
+                }
             }
         }
 
@@ -298,7 +302,12 @@ public class CellActionManager : MonoBehaviour
         yield return new WaitForSeconds(1.5f);
 
         Bank.AddMoney(player, bonus.Value);
-        GameManager.StatsManager.AddToStat("income", bonus.Value);
+        if (player.Opponent == null)
+        {
+            GameManager.StatsManager.AddToStat("income", bonus.Value);
+            if (GameManager.StatsManager.GetStat("maxBudget") <= player.MoneySum)
+                GameManager.StatsManager.AddToStat("maxBudget", player.MoneySum);
+        }
     }
 
     private IEnumerator HandleFineCoroutine(Game game, Player player, Action<bool> onCompleted)
@@ -507,9 +516,11 @@ public class CellActionManager : MonoBehaviour
                 
                 Bank.TakeMoney(guest, payment);
                 Bank.AddMoney(host, payment);
-                if (winner.Opponent != null)
+                if (winner.Opponent == null)
                 {
                     GameManager.StatsManager.AddToStat("income", payment);
+                    if (GameManager.StatsManager.GetStat("maxBudget") <= winner.MoneySum)
+                        GameManager.StatsManager.AddToStat("maxBudget", winner.MoneySum);
                 }
             }
         }
@@ -534,9 +545,11 @@ public class CellActionManager : MonoBehaviour
                 }
                 Bank.TakeMoney(host, payment);
                 Bank.AddMoney(guest, payment);
-                if (winner.Opponent != null)
+                if (winner.Opponent == null)
                 {
                     GameManager.StatsManager.AddToStat("income", payment);
+                    if (GameManager.StatsManager.GetStat("maxBudget") <= winner.MoneySum)
+                        GameManager.StatsManager.AddToStat("maxBudget", winner.MoneySum);
                 }
             }
         }

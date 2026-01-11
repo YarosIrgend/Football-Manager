@@ -171,7 +171,10 @@ public class GameManager : MonoBehaviour
             MoneyPayer.ConditionsWarningPanel.SetActive(true);
             return;
         }
-
+        
+        if (StatsManager.GetStat("maxBudget") <= CurrentPlayer.MoneySum)
+            StatsManager.AddToStat("maxBudget", CurrentPlayer.MoneySum);
+            
         // якщо була купівля клубу або телекомпанії
         if (CellActionManager.PendingPurchase != null)
         {
