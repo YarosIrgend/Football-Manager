@@ -12,7 +12,6 @@ public class StatsData
     public int maxBudget;
 }
 
-
 public class StatsManager : MonoBehaviour
 {
     public StatsData stats;
@@ -57,7 +56,7 @@ public class StatsManager : MonoBehaviour
         };
     }
 
-    public void AddToStat(string key, int amount)
+    public void AddToStat(string key, int amount = 1)
     {
         switch (key)
         {

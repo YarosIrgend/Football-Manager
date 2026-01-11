@@ -116,6 +116,7 @@ public class CellActionManager : MonoBehaviour
                     club.Manager = null;
                     onCompleted(false);
                     GameManager.MatchStatsData.clubsBought++;
+                    GameManager.StatsManager.AddToStat("expenses", club.Price);
                 }
                 else
                 {
@@ -194,8 +195,9 @@ public class CellActionManager : MonoBehaviour
             if (player.Opponent == null) // наш гравець платить
             {
                 MoneyPayer.SetPayment(payment);
-                Bank.AddMoney(owner, MoneyPayer.RequiredMoney);
+                Bank.AddMoney(owner, payment);
                 onCompleted(false);
+                GameManager.StatsManager.AddToStat("expenses", payment);
             }
             else // противник платить
             {
@@ -211,6 +213,9 @@ public class CellActionManager : MonoBehaviour
                 
                 Bank.TakeMoney(player, payment);
                 Bank.AddMoney(owner, payment);
+                
+                if(owner.Opponent == null)
+                    GameManager.StatsManager.AddToStat("income", payment);
             }
         }
 
@@ -229,6 +234,7 @@ public class CellActionManager : MonoBehaviour
                     MoneyPayer.SetPayment(telecompany.Price);
                     onCompleted(false);
                     GameManager.MatchStatsData.telecompaniesBought++;
+                    GameManager.StatsManager.AddToStat("expenses", telecompany.Price);
                 }
                 else
                 {
@@ -292,6 +298,7 @@ public class CellActionManager : MonoBehaviour
         yield return new WaitForSeconds(1.5f);
 
         Bank.AddMoney(player, bonus.Value);
+        GameManager.StatsManager.AddToStat("income", bonus.Value);
     }
 
     private IEnumerator HandleFineCoroutine(Game game, Player player, Action<bool> onCompleted)
@@ -303,10 +310,7 @@ public class CellActionManager : MonoBehaviour
 
         if (player.Opponent == null) // наш гравець платить
         {
-            MoneyPayer.RequiredMoney = fine.Value;
-            MoneyPayer.MoneyPayerObject.SetActive(true);
-            MoneyPayer.MoneyPayerPanel.SetActive(true);
-            MoneyPayer.ShowMoney();
+            MoneyPayer.SetPayment(fine.Value);
             onCompleted(false);
         }
         else // противник платить
@@ -321,6 +325,7 @@ public class CellActionManager : MonoBehaviour
             }
 
             Bank.TakeMoney(player, fine.Value);
+            GameManager.StatsManager.AddToStat("expenses", fine.Value);
             onCompleted(true);
 
         }
@@ -351,6 +356,7 @@ public class CellActionManager : MonoBehaviour
 
             Bank.TakeMoney(player, tax);
             onCompleted(true);
+            GameManager.StatsManager.AddToStat("expenses", tax);
         }
 
     }
@@ -396,6 +402,7 @@ public class CellActionManager : MonoBehaviour
             {
                 MoneyPayer.SetPayment(payment);
                 Bank.AddMoney(host, MoneyPayer.RequiredMoney);
+                GameManager.StatsManager.AddToStat("expenses", payment);
             }
             else // противник платить
             {
@@ -485,6 +492,7 @@ public class CellActionManager : MonoBehaviour
             {
                 MoneyPayer.SetPayment(payment);
                 Bank.AddMoney(host, MoneyPayer.RequiredMoney);
+                GameManager.StatsManager.AddToStat("expenses", payment);
             }
             else // противник платить
             {
@@ -499,6 +507,10 @@ public class CellActionManager : MonoBehaviour
                 
                 Bank.TakeMoney(guest, payment);
                 Bank.AddMoney(host, payment);
+                if (winner.Opponent != null)
+                {
+                    GameManager.StatsManager.AddToStat("income", payment);
+                }
             }
         }
         else if (winner == guest)
@@ -508,6 +520,7 @@ public class CellActionManager : MonoBehaviour
             {
                 MoneyPayer.SetPayment(payment);
                 Bank.AddMoney(guest, MoneyPayer.RequiredMoney);
+                GameManager.StatsManager.AddToStat("expenses", payment);
             }
             else // противник платить
             {
@@ -521,6 +534,10 @@ public class CellActionManager : MonoBehaviour
                 }
                 Bank.TakeMoney(host, payment);
                 Bank.AddMoney(guest, payment);
+                if (winner.Opponent != null)
+                {
+                    GameManager.StatsManager.AddToStat("income", payment);
+                }
             }
         }
         guestClub.IsPlayable = false;
@@ -599,5 +616,4 @@ public class CellActionManager : MonoBehaviour
             GameManager.EndGame(false); // програш
         }
     }
-
 }

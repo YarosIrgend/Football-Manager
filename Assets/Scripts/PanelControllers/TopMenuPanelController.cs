@@ -7,6 +7,7 @@ public class TopMenuPanelController : PanelController
 {
     public bool isMoved;
     public GameObject TopMenuPanel;
+    public GameManager GameManager;
     public Button MoveButton;
     private TMP_Text moveButtonText;
     
@@ -17,7 +18,8 @@ public class TopMenuPanelController : PanelController
     
     public void ExitGame()
     {
-        SceneManager.LoadScene("MainMenu");
+        GameManager.EndGame(false);
+        //SceneManager.LoadScene("MainMenu");
     }
 
     public void MovePanel()

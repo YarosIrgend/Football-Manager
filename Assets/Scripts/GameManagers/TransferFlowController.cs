@@ -7,6 +7,7 @@ public class TransferFlowController : MonoBehaviour
     public static TransferFlowController Instance;
 
     public MoneyPayer MoneyPayer;
+    public StatsManager StatsManager;
     public PropertiesPanelController PropertiesPanelController;
     public TransferPanelController TransferPanelController;
     public TransferManager TransferManager;
@@ -85,10 +86,8 @@ public class TransferFlowController : MonoBehaviour
                 MessagePanelController.Instance.Show("В цьому клубі є футболіст");
                 return;
             }
-            MoneyPayer.RequiredMoney = footballer.Price;
-            MoneyPayer.MoneyPayerObject.SetActive(true);
-            MoneyPayer.MoneyPayerPanel.SetActive(true);
-            MoneyPayer.ShowMoney();
+            MoneyPayer.SetPayment(footballer.Price);
+            StatsManager.AddToStat("expenses", footballer.Price);
             club.Footballer = f;
         };
         
@@ -132,10 +131,8 @@ public class TransferFlowController : MonoBehaviour
                 MessagePanelController.Instance.Show("В цьому клубі є тренер");
                 return;
             }
-            MoneyPayer.RequiredMoney = trainer.Price;
-            MoneyPayer.MoneyPayerObject.SetActive(true);
-            MoneyPayer.MoneyPayerPanel.SetActive(true);
-            MoneyPayer.ShowMoney();
+            MoneyPayer.SetPayment(trainer.Price);
+            StatsManager.AddToStat("expenses", trainer.Price);
             club.Trainer = t;
         };
     }
@@ -175,10 +172,8 @@ public class TransferFlowController : MonoBehaviour
                 return;
             }
             
-            MoneyPayer.RequiredMoney = manager.Price;
-            MoneyPayer.MoneyPayerObject.SetActive(true);
-            MoneyPayer.MoneyPayerPanel.SetActive(true);
-            MoneyPayer.ShowMoney();
+            MoneyPayer.SetPayment(manager.Price);
+            StatsManager.AddToStat("expenses", manager.Price);
             club.Manager = m;
         };
     }
@@ -193,8 +188,8 @@ public class TransferFlowController : MonoBehaviour
         }
 
         Bank.AddMoney(CurrentPlayer, club.Footballer.Price);
+        StatsManager.AddToStat("income", club.Footballer.Price);
         club.Footballer = null;
-        
     }
 
     public void SellTrainer(Club club)
@@ -206,6 +201,7 @@ public class TransferFlowController : MonoBehaviour
         }
 
         Bank.AddMoney(CurrentPlayer, club.Trainer.Price);
+        StatsManager.AddToStat("income", club.Trainer.Price);
         club.Trainer = null;
     }
 
@@ -218,6 +214,7 @@ public class TransferFlowController : MonoBehaviour
         }
 
         Bank.AddMoney(CurrentPlayer, club.Manager.Price);
+        StatsManager.AddToStat("income", club.Manager.Price);
         club.Manager = null;
     }
 }
