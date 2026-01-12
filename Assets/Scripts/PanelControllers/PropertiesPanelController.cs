@@ -13,8 +13,8 @@ public class PropertiesPanelController : MonoBehaviour
     public MoneyPayer MoneyPayer;
     public StatsManager StatsManager;
 
-    public GameObject ClubsPlane;
-    public GameObject TelecompaniesPlane;
+    public GameObject ClubsButton;
+    public GameObject TelecompaniesButton;
 
     [Header("General panels")] public GameObject ClubsPanel; // спільний для клубів та теле-ній 
     public Transform ClubsContent;

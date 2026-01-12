@@ -13,9 +13,17 @@ public class PropertyClickable : MonoBehaviour, IPointerClickHandler
         this.DoAction = doAction;
     }
 
-    public void OnMouseDown()
+    // public void OnMouseDown()
+    // {
+    //     DoAction(player);
+    // }
+    
+    void OnMouseDown()
     {
-        DoAction(player);
+        if (EventSystem.current.IsPointerOverGameObject())
+            return;
+
+        DoAction?.Invoke(player);
     }
     
     public void OnPointerClick(PointerEventData eventData)

@@ -65,8 +65,8 @@ public class PropertyManager : MonoBehaviour
 
     public void ShowPropertyPanel(Player player)
     {
-        var clubsPlane = GetObject("ClubsPlane").gameObject;
-        var telecompaniesPlane = GetObject("TelecompaniesPlane").gameObject;
+        var clubsPlane = GetObject("ClubsButton").gameObject;
+        var telecompaniesPlane = GetObject("TelecompaniesButton").gameObject;
 
         // видаляємо clickables з кнопок, щоб переписати їх на іншого гравця
         RemoveClickable(clubsPlane);
