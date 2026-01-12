@@ -38,8 +38,8 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        //Game.GameSettings = MatchSettingsController.GameSettings;
-        Game.GameSettings = new GameSettings { Difficulty = Difficulty.Easy, PlayerCount = 2, ChipColor = Color.blue };
+        Game.GameSettings = MatchSettingsController.GameSettings;
+        //Game.GameSettings = new GameSettings { Difficulty = Difficulty.Easy, PlayerCount = 2, ChipColor = Color.blue };
         BoardManager.GenerateSnapPoints();
         InitializeGame();
         PropertyManager.SetPlayers(Game.Players);
