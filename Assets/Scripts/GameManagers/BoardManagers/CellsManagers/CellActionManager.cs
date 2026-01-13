@@ -96,8 +96,7 @@ public class CellActionManager : MonoBehaviour
             var ownerClub = owner.Clubs.FirstOrDefault(t => t.Name == cell.CellName);
             // якщо клуб є, треба провести матч за можливості
             yield return StartCoroutine(HoldTheMatchCouroutine(owner, player, ownerClub));
-
-            onCompleted(false);
+            onCompleted(MoneyPayer.RequiredMoney == 0);
         }
 
         // якщо ніхто не володіє, то можна придбати за бажанням
