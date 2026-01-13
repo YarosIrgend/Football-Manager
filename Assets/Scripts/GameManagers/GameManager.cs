@@ -155,7 +155,7 @@ public class GameManager : MonoBehaviour
             yield break;
         }
 
-        //var cells = 13;
+        //var cells = 2;
         var cells = ThrowDices();
         MessagePanelController.Instance.Show($"Випало: {cells}");
         yield return new WaitForSeconds(1.5f);
@@ -224,8 +224,8 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator OpponentTurnCoroutine()
     {
-        var cells = 13;
-        //var cells = ThrowDices();
+        //var cells = 4;
+        var cells = ThrowDices();
 
         MessagePanelController.Instance.Show($"Випало: {cells}");
         yield return new WaitForSeconds(1.5f);
