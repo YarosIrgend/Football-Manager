@@ -151,7 +151,7 @@ public class TransferFlowController : MonoBehaviour
         if (CurrentPlayer.MoneySum < manager.Price)
         {
             TransferPanelController.ManagerPanelController.InfoText.text =
-                "Недостатньо коштів для покупки цього гравця";
+                "Недостатньо коштів для покупки менеджера";
             return;
         }
 

@@ -279,7 +279,7 @@ public class PropertiesPanelController : MonoBehaviour
             $"Менеджер: {(club.Manager != null ? "Є" : "Немає")}"
         );
 
-        CreateRow("IsPlayableRow", clubInfo, $"Готовий до гри: {(club.IsPlayable ? "ТАК" : "НІ")}");
+        CreateRow("IsPlayableRow", clubInfo, $"У запасі: {(club.IsPlayable ? "НІ" : "ТАК")}");
         CreateRow("IsMortgagedRow", clubInfo, $"Закладений: {(club.IsMortgaged ? "ТАК" : "НІ")}");
     }
 

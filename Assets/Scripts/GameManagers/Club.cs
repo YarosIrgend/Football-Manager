@@ -7,7 +7,7 @@ public class Club : Property
     public Footballer Footballer;
     public Trainer Trainer;
     public Manager Manager;
-    public bool IsPlayable;
+    public bool IsPlayable; // статус "у запасі" (тобто не може грати у виїзних матчах)
 
     // Термін перебування команди у запасі - 1 круг поля (31 клітинка)
     private byte spareTerm;

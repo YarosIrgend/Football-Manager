@@ -194,6 +194,7 @@ public class GameManager : MonoBehaviour
         }
 
         EndTurnButton.SetActive(false);
+        MoneyPayer.gameObject.SetActive(false);
         SetNextPlayer();
         StartCoroutine(OpponentsTurnsCoroutine()); // здійснення ходів противника
     }

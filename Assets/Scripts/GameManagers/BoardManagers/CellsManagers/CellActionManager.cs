@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 
 public class CellActionManager : MonoBehaviour
@@ -104,7 +105,7 @@ public class CellActionManager : MonoBehaviour
         {
             if (player.Opponent == null)
             {
-                ShowPropertyWithChoiceToBuy(cell);
+                ShowPropertyWithChoiceToBuy(cell, player);
                 // Чекаємо натискання кнопки
                 while (CellManager.BuyingChoice.activeSelf)
                     yield return null;
@@ -229,7 +230,7 @@ public class CellActionManager : MonoBehaviour
         {
             if (player.Opponent == null)
             {
-                ShowPropertyWithChoiceToBuy(cell);
+                ShowPropertyWithChoiceToBuy(cell, player);
                 // Чекаємо натискання кнопки
                 while (CellManager.BuyingChoice.activeSelf)
                     yield return null;
@@ -565,26 +566,33 @@ public class CellActionManager : MonoBehaviour
         }
     }
 
-    private void ShowPropertyWithChoiceToBuy(Cell cell)
+    private void ShowPropertyWithChoiceToBuy(Cell cell, Player player)
     {
-        // Гравець показуємо панель з інформацією
         CellManager.ShowPropertyInfoPanel(cell.CellName);
 
-        // Активуємо BuyingChoicePanel для ручної дії
         CellManager.BuyingChoice.SetActive(true);
-
-        // Підписуємо кнопки "Так/Ні"
+        
+        var text = BuyingChoice.transform.Find("Text").GetComponent<TMP_Text>();
+        text.text = "Придбати?";
+        text.color = Color.white;
+        
+        // Підписуємо кнопки Так/Ні
         var buttons = CellManager.BuyingChoice.GetComponentsInChildren<UnityEngine.UI.Button>();
         foreach (var btn in buttons)
             btn.onClick.RemoveAllListeners();
 
         buttons[0].onClick.AddListener(() =>
         {
+            PendingPurchase = GameManager.Game.Clubs.FirstOrDefault(c => c.Name == cell.CellName) as Property
+                              ?? GameManager.Game.Telecompanies.First(t => t.Name == cell.CellName);
+            if (player.MoneySum < PendingPurchase.Price)
+            {
+                text.text = "Недостатньо коштів";
+                text.color = Color.red;
+            }
             BuyChoice = true;
             CellManager.BuyingChoice.SetActive(false);
             CellManager.ClosePropertyInfoPanel();
-            PendingPurchase = GameManager.Game.Clubs.FirstOrDefault(c => c.Name == cell.CellName) as Property
-                              ?? GameManager.Game.Telecompanies.First(t => t.Name == cell.CellName);
         });
 
         buttons[1].onClick.AddListener(() =>
