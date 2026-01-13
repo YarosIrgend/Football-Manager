@@ -121,7 +121,7 @@ public class TransferPanelController : MonoBehaviour
     
     // ===== HELPERS =====
 
-    private void CloseAll()
+    public void CloseAll()
     {
         TransferChoicePanel.SetActive(false);
         TransferPanel.SetActive(false);

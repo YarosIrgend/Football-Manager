@@ -416,9 +416,18 @@ public class PropertiesPanelController : MonoBehaviour
                 break;
         }
 
-        CloseClubInfoPanelForTransfer();
+        CloseClubsPanelForTransfer();
     }
 
+    public void CloseClubsPanelForTransfer()
+    {
+        CloseClubInfoPanelForTransfer();
+        var scrollView = ClubsPanelForTransfer.transform.Find("Scroll View").gameObject;
+        if (scrollView != null)
+            scrollView.SetActive(false);
+        ClubsPanelForTransfer.SetActive(false);
+    }
+    
     public void OnSellFootballerClicked()
     {
         if (selectedClub == null)

@@ -52,6 +52,7 @@ public class CellActionManager : MonoBehaviour
 
             case CellType.Transfer:
                 yield return HandleTransferCoroutine(game, player, r => completed = r);
+                SetTransferButtonActive(false);
                 break;
 
             case CellType.Disqualification:
@@ -87,11 +88,12 @@ public class CellActionManager : MonoBehaviour
             {
                 yield break;
             }
+
             MessagePanelController.Instance.Show(
                 $"Є гравець {owner.ColorString}, який володіє цим клубом.");
             yield return new WaitForSeconds(1.5f);
 
-            var ownerClub = owner.Clubs.FirstOrDefault(t => t.Name == cell.CellName); 
+            var ownerClub = owner.Clubs.FirstOrDefault(t => t.Name == cell.CellName);
             // якщо клуб є, треба провести матч за можливості
             yield return StartCoroutine(HoldTheMatchCouroutine(owner, player, ownerClub));
 
@@ -142,13 +144,13 @@ public class CellActionManager : MonoBehaviour
                     onCompleted(true);
                     yield break;
                 }
-        
+
                 Bank.TakeMoney(player, club.Price);
                 club.Footballer = null;
                 club.Trainer = null;
                 club.Manager = null;
                 player.Clubs.Add(club);
-                
+
                 MessagePanelController.Instance.Show($"Гравець {player.ColorString} купив клуб {club.Name}");
                 yield return new WaitForSeconds(1.5f);
                 onCompleted(true);
@@ -172,18 +174,18 @@ public class CellActionManager : MonoBehaviour
             {
                 yield break;
             }
-            
+
             MessagePanelController.Instance.Show(
                 $"Є гравець {owner.ColorString}, який володіє цією компанією. Усього: {owner.Telecompanies.Count}");
             yield return new WaitForSeconds(1.5f);
-            
+
             if (telecompany.IsMortgaged)
             {
                 MessagePanelController.Instance.Show("Телекомпанія закладена");
                 yield return new WaitForSeconds(1.5f);
                 yield break;
             }
-            
+
             var payment = owner.Telecompanies.Count switch
             {
                 1 => 300_000,
@@ -210,7 +212,7 @@ public class CellActionManager : MonoBehaviour
                     onCompleted(true);
                     yield break;
                 }
-                
+
                 Bank.TakeMoney(player, payment);
                 Bank.AddMoney(owner, payment);
 
@@ -265,7 +267,8 @@ public class CellActionManager : MonoBehaviour
 
                 Bank.TakeMoney(player, telecompany.Price);
                 player.Telecompanies.Add(telecompany);
-                MessagePanelController.Instance.Show($"Гравець {player.ColorString} купив телекомпанію {telecompany.Name}");
+                MessagePanelController.Instance.Show(
+                    $"Гравець {player.ColorString} купив телекомпанію {telecompany.Name}");
                 yield return new WaitForSeconds(1.5f);
                 onCompleted(true);
             }
@@ -276,14 +279,16 @@ public class CellActionManager : MonoBehaviour
     {
         // рішення купити (обробити, якщо вирішив купити, то додати когось, кого він хоче)
         // але за правилами, що спочатку в клуб може купитися футболіст, потім тренер, потім менеджер за бажанням
-        
+
         if (player.Opponent != null)
         {
-            player.Opponent.HandleTransfer(player);
+            yield return StartCoroutine(player.Opponent.HandleTransfer(player));
             onCompleted(true);
             yield break;
         }
-
+        
+        SetTransferButtonActive();
+        
         bool finished = false;
 
         TransferFlowController.Instance.StartTransfer(game, player, () => finished = true);
@@ -293,7 +298,7 @@ public class CellActionManager : MonoBehaviour
 
         onCompleted(true);
     }
-    
+
     private IEnumerator HandleBonusCoroutine(Player player, Game game)
     {
         var bonus = game.Bonuses.GetRandomItem();
@@ -336,7 +341,6 @@ public class CellActionManager : MonoBehaviour
             Bank.TakeMoney(player, fine.Value);
             GameManager.StatsManager.AddToStat("expenses", fine.Value);
             onCompleted(true);
-
         }
     }
 
@@ -367,7 +371,6 @@ public class CellActionManager : MonoBehaviour
             onCompleted(true);
             GameManager.StatsManager.AddToStat("expenses", tax);
         }
-
     }
 
     private IEnumerator HandleDisqualificationCoroutine(Player player)
@@ -378,7 +381,7 @@ public class CellActionManager : MonoBehaviour
 
         player.IsPlayable = false;
     }
-    
+
     private IEnumerator HoldTheMatchCouroutine(Player host, Player guest, Club hostClub)
     {
         if (!hostClub.IsPlayable || hostClub.Footballer == null)
@@ -493,7 +496,7 @@ public class CellActionManager : MonoBehaviour
         }
 
         yield return new WaitForSeconds(1.5f);
-        
+
         if (winner == host)
         {
             payment = MatchPaymentSum(hostClub);
@@ -513,7 +516,7 @@ public class CellActionManager : MonoBehaviour
                     yield return DeclareBankruptcy(guest);
                     yield break;
                 }
-                
+
                 Bank.TakeMoney(guest, payment);
                 Bank.AddMoney(host, payment);
                 if (winner.Opponent == null)
@@ -543,6 +546,7 @@ public class CellActionManager : MonoBehaviour
                     yield return DeclareBankruptcy(guest);
                     yield break;
                 }
+
                 Bank.TakeMoney(host, payment);
                 Bank.AddMoney(guest, payment);
                 if (winner.Opponent == null)
@@ -553,8 +557,9 @@ public class CellActionManager : MonoBehaviour
                 }
             }
         }
-        guestClub.IsPlayable = false;
         
+        guestClub.IsPlayable = false;
+
         if (winner is { Opponent: null })
         {
             GameManager.MatchStatsData.matchWins++;
@@ -563,7 +568,7 @@ public class CellActionManager : MonoBehaviour
 
     private void ShowPropertyWithChoiceToBuy(Cell cell)
     {
-        // Гравець → показуємо панель з інформацією
+        // Гравець показуємо панель з інформацією
         CellManager.ShowPropertyInfoPanel(cell.CellName);
 
         // Активуємо BuyingChoicePanel для ручної дії
@@ -606,7 +611,7 @@ public class CellActionManager : MonoBehaviour
 
         return sum;
     }
-    
+
     private IEnumerator DeclareBankruptcy(Player player)
     {
         player.IsBankrupt = true;
@@ -623,10 +628,16 @@ public class CellActionManager : MonoBehaviour
         );
         yield return new WaitForSeconds(1.5f);
 
-        // 🔥 ЯКЩО ЦЕ НАШ ГРАВЕЦЬ — ГРА ЗАВЕРШЕНА
+        //  якщо це наш гравець - гра завершена
         if (player.Opponent == null)
         {
             GameManager.EndGame(false); // програш
         }
+    }
+
+    private void SetTransferButtonActive(bool active = true)
+    {
+        var transferButton = GameObject.Find("Canvas/TransferFlowController/TransferButton");
+        transferButton.SetActive(active);
     }
 }

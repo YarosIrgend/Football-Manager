@@ -38,8 +38,8 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        Game.GameSettings = MatchSettingsController.GameSettings;
-        //Game.GameSettings = new GameSettings { Difficulty = Difficulty.Easy, PlayerCount = 2, ChipColor = Color.blue };
+        //Game.GameSettings = MatchSettingsController.GameSettings;
+        Game.GameSettings = new GameSettings { Difficulty = Difficulty.Easy, PlayerCount = 2, ChipColor = Color.blue };
         BoardManager.GenerateSnapPoints();
         InitializeGame();
         PropertyManager.SetPlayers(Game.Players);
@@ -155,8 +155,8 @@ public class GameManager : MonoBehaviour
             yield break;
         }
 
-        //int cells = 10;
-        int cells = ThrowDices();
+        //var cells = 13;
+        var cells = ThrowDices();
         MessagePanelController.Instance.Show($"Випало: {cells}");
         yield return new WaitForSeconds(1.5f);
 
@@ -224,7 +224,7 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator OpponentTurnCoroutine()
     {
-        var cells = 8;
+        var cells = 13;
         //var cells = ThrowDices();
 
         MessagePanelController.Instance.Show($"Випало: {cells}");

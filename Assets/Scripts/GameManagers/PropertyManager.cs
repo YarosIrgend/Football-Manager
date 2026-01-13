@@ -80,7 +80,16 @@ public class PropertyManager : MonoBehaviour
         propertyPanel.SetActive(true);
         openedPanels.Add(propertyPanel);
         PropertyPanelController.MoneyPanelController.ShowMoney(player);
-
+        PropertyPanelController.PlayerColor.text = player.ColorString;
+        
+        PropertyPanelController.PlayerColor.color = player.ColorString switch
+        {
+            "Червоний" => Color.red,
+            "Синій" => Color.blue,
+            "Зелений" => Color.green,
+            _ => Color.yellow
+        };
+        
         // присвоїти кнопкам Клуби та Телек-ії відповідні кліки з гравцями
         SetClickableForPlayer(player, clubsPlane, PropertyPanelController.PropertiesPanelController.ShowClubsPanel);
         SetClickableForPlayer(player, telecompaniesPlane,

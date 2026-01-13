@@ -1,3 +1,5 @@
+using System.Collections;
+
 public abstract class Opponent
 {
     protected float mistakeChance;
@@ -7,11 +9,6 @@ public abstract class Opponent
     protected OpponentDecisionService DecisionService;
 
     private bool initialized;
-
-    private void Start()
-    {
-        Init();
-    }
     
     public void Init()
     {
@@ -33,5 +30,5 @@ public abstract class Opponent
 
     public abstract bool DecideBuyProperty(Game game, Player self, Property property);
     public abstract bool TryResolveMoney(Player self, int requiredMoney);
-    public abstract void HandleTransfer(Player self);
+    public abstract IEnumerator HandleTransfer(Player self);
 }

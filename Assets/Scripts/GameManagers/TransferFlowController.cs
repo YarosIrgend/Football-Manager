@@ -93,6 +93,8 @@ public class TransferFlowController : MonoBehaviour
         
         PropertiesPanelController.ShowClubsPanelForTransfer(CurrentPlayer, footballer,
             TransferPanelController.FootballerPanel);
+        
+        TransferPanelController.CloseAll();
     }
 
     public void OnTrainerBuy(Trainer trainer)

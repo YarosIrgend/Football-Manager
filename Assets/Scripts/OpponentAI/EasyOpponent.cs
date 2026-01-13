@@ -1,4 +1,6 @@
+using System.Collections;
 using System.Linq;
+using UnityEngine;
 
 public class EasyOpponent : Opponent
 {
@@ -20,57 +22,67 @@ public class EasyOpponent : Opponent
         return MoneyUtils.GetTotalMoney(self) >= requiredMoney;
     }
 
-    public override void HandleTransfer(Player self)
+    public override IEnumerator HandleTransfer(Player self)
     {
+        Init();
         var club = self.Clubs.FirstOrDefault(c => c.IsPlayable);
         if (club == null)
-            return;
+            yield break;
 
         if (club.Footballer == null)
         {
-            TryBuyFootballer(self, club);
-            return;
+            yield return TryBuyFootballer(self, club);
+            yield break;
         }
 
         if (club.Trainer == null)
         {
-            TryBuyTrainer(self, club);
-            return;
+            yield return TryBuyTrainer(self, club);
+            yield break;
         }
 
         if (club.Manager == null && UnityEngine.Random.value > 0.5f)
         {
-            TryBuyManager(self, club);
+            yield return TryBuyManager(self, club);
         }
     }
 
-    private void TryBuyFootballer(Player self, Club club)
+    private IEnumerator TryBuyFootballer(Player self, Club club)
     {
         var f = TransferManager.Footballers.GetRandomItem();
         if (MoneyUtils.GetTotalMoney(self) < f.Price)
-            return;
+            yield break;
 
         Bank.TakeMoney(self, f.Price);
         club.Footballer = f;
+        MessagePanelController.Instance.Show($"{self.ColorString} придбав у команду {club.Name}" +
+                                             $" {f.Points}-очкового футболіста");
+        yield return new WaitForSeconds(1.5f);
     }
 
-    private void TryBuyTrainer(Player self, Club club)
+    private IEnumerator TryBuyTrainer(Player self, Club club)
     {
         var t = TransferManager.Trainers.GetRandomItem();
         if (MoneyUtils.GetTotalMoney(self) < t.Price)
-            return;
+            yield break;
 
         Bank.TakeMoney(self, t.Price);
         club.Trainer = t;
+        MessagePanelController.Instance.Show($"{self.ColorString} придбав у команду {club.Name}" +
+                                             $" {t.Points}-очкового тренера");
+        yield return new WaitForSeconds(1.5f);
     }
 
-    private void TryBuyManager(Player self, Club club)
+    private IEnumerator TryBuyManager(Player self, Club club)
     {
         var m = TransferManager.Manager;
         if (MoneyUtils.GetTotalMoney(self) < m.Price)
-            return;
+            yield break;
 
         Bank.TakeMoney(self, m.Price);
         club.Manager = m;
+        MessagePanelController.Instance.Show($"{self.ColorString} придбав у команду {club.Name}" +
+                                             " менеджера");
+        yield return new WaitForSeconds(1.5f);
     }
 }

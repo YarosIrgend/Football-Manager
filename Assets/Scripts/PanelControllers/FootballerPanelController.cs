@@ -61,12 +61,9 @@ public class FootballerPanelController : MonoBehaviour
                 OnFootballerSelected(footballer);
             };
         }
-
-
+        
         gameObject.SetActive(true);
     }
-    
-    
     
     private void OnFootballerSelected(Footballer footballer)
     {
