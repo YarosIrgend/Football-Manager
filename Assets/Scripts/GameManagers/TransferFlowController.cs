@@ -87,7 +87,7 @@ public class TransferFlowController : MonoBehaviour
                 return;
             }
             MoneyPayer.SetPayment(footballer.Price);
-            StatsManager.AddToStat("expenses", footballer.Price);
+            StatsManager.AddToStat("expenses", (ulong)footballer.Price);
             club.Footballer = f;
         };
         
@@ -134,7 +134,7 @@ public class TransferFlowController : MonoBehaviour
                 return;
             }
             MoneyPayer.SetPayment(trainer.Price);
-            StatsManager.AddToStat("expenses", trainer.Price);
+            StatsManager.AddToStat("expenses", (ulong)trainer.Price);
             club.Trainer = t;
         };
     }
@@ -175,7 +175,7 @@ public class TransferFlowController : MonoBehaviour
             }
             
             MoneyPayer.SetPayment(manager.Price);
-            StatsManager.AddToStat("expenses", manager.Price);
+            StatsManager.AddToStat("expenses", (ulong)manager.Price);
             club.Manager = m;
         };
     }
@@ -190,7 +190,7 @@ public class TransferFlowController : MonoBehaviour
         }
 
         Bank.AddMoney(CurrentPlayer, club.Footballer.Price);
-        StatsManager.AddToStat("income", club.Footballer.Price);
+        StatsManager.AddToStat("income", (ulong)club.Footballer.Price);
         club.Footballer = null;
     }
 
@@ -203,7 +203,7 @@ public class TransferFlowController : MonoBehaviour
         }
 
         Bank.AddMoney(CurrentPlayer, club.Trainer.Price);
-        StatsManager.AddToStat("income", club.Trainer.Price);
+        StatsManager.AddToStat("income", (ulong)club.Trainer.Price);
         club.Trainer = null;
     }
 
@@ -216,7 +216,7 @@ public class TransferFlowController : MonoBehaviour
         }
 
         Bank.AddMoney(CurrentPlayer, club.Manager.Price);
-        StatsManager.AddToStat("income", club.Manager.Price);
+        StatsManager.AddToStat("income", (ulong)club.Manager.Price);
         club.Manager = null;
     }
 }

@@ -75,12 +75,12 @@ public class PropertiesPanelController : MonoBehaviour
                 if (!club.IsMortgaged)
                 {
                     Bank.AddMoney(selectedPlayer, club.Price);
-                    StatsManager.AddToStat("income", club.Price);
+                    StatsManager.AddToStat("income", (ulong)club.Price);
                 }
                 else
                 {
                     Bank.AddMoney(selectedPlayer, club.Price / 2);
-                    StatsManager.AddToStat("income", club.Price / 2);
+                    StatsManager.AddToStat("income", (ulong)club.Price / 2);
                 }
 
                 break;
@@ -90,12 +90,12 @@ public class PropertiesPanelController : MonoBehaviour
                 if (!telecompany.IsMortgaged)
                 {
                     Bank.AddMoney(selectedPlayer, telecompany.Price);
-                    StatsManager.AddToStat("income", telecompany.Price);
+                    StatsManager.AddToStat("income", (ulong)telecompany.Price);
                 }
                 else
                 {
                     Bank.AddMoney(selectedPlayer, telecompany.Price / 2);
-                    StatsManager.AddToStat("income", telecompany.Price / 2);
+                    StatsManager.AddToStat("income", (ulong)telecompany.Price / 2);
                 }
 
                 break;
@@ -117,12 +117,12 @@ public class PropertiesPanelController : MonoBehaviour
             case Club club:
                 club.IsMortgaged = true;
                 Bank.AddMoney(selectedPlayer, club.Price / 2);
-                StatsManager.AddToStat("income", club.Price);
+                StatsManager.AddToStat("income", (ulong)club.Price);
                 break;
             case Telecompany telecompany:
                 telecompany.IsMortgaged = true;
                 Bank.AddMoney(selectedPlayer, telecompany.Price / 2);
-                StatsManager.AddToStat("income", telecompany.Price / 2);
+                StatsManager.AddToStat("income", (ulong)telecompany.Price / 2);
                 break;
         }
     
@@ -152,7 +152,7 @@ public class PropertiesPanelController : MonoBehaviour
         propertyPanel.SetActive(false);
         MoneyPayer.SetPayment(selectedProperty.Price / 2);
         selectedProperty.IsMortgaged = false;
-        StatsManager.AddToStat("expenses", selectedProperty.Price / 2);
+        StatsManager.AddToStat("expenses", (ulong)selectedProperty.Price / 2);
     }
 
     # endregion

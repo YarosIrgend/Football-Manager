@@ -8,7 +8,7 @@
     {
         return new GameState
         {
-            Money = self.MoneySum,
+            Money = (int)self.MoneySum,
             ClubCount = self.Clubs.Count,
             TelecompanyCount = self.Telecompanies.Count
         };

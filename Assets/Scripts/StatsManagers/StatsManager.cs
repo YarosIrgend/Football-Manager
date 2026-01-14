@@ -4,12 +4,12 @@ using UnityEngine;
 [System.Serializable]
 public class StatsData
 {
-    public int winsOnEasy;
-    public int winsOnHard;
-    public int losses;
-    public int income;
-    public int expenses;
-    public int maxBudget;
+    public ushort winsOnEasy;
+    public ushort winsOnHard;
+    public ushort losses;
+    public ulong income;
+    public ulong expenses;
+    public uint maxBudget;
 }
 
 public class StatsManager : MonoBehaviour
@@ -42,7 +42,7 @@ public class StatsManager : MonoBehaviour
         File.WriteAllText(filePath, json);
     }
 
-    public int GetStat(string key)
+    public ulong GetStat(string key)
     {
         return key switch
         {
@@ -56,16 +56,16 @@ public class StatsManager : MonoBehaviour
         };
     }
 
-    public void AddToStat(string key, int amount = 1)
+    public void AddToStat(string key, ulong amount = 1)
     {
         switch (key)
         {
-            case "winsOnEasy": stats.winsOnEasy += amount; break;
-            case "winsOnHard": stats.winsOnHard += amount; break;
-            case "losses": stats.losses += amount; break;
+            case "winsOnEasy": stats.winsOnEasy += (ushort)amount; break;
+            case "winsOnHard": stats.winsOnHard += (ushort)amount; break;
+            case "losses": stats.losses += (ushort)amount; break;
             case "income": stats.income += amount; break;
             case "expenses": stats.expenses += amount; break;
-            case "maxBudget": stats.maxBudget = amount; break;
+            case "maxBudget": stats.maxBudget = (uint)amount; break;
         }
 
         SaveStats();

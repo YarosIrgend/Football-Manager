@@ -58,11 +58,11 @@ public class Player
     }; 
     public Opponent Opponent; // якщо Opponent == null - це наш гравець
 
-    public int MoneySum 
+    public uint MoneySum 
     {
         get
         {
-            return Money.Sum(banknoteGroup => banknoteGroup.Banknote.Value * banknoteGroup.Amount);
+            return (uint)Money.Sum(banknoteGroup => (long)banknoteGroup.Banknote.Value * banknoteGroup.Amount);
         }
     }
 

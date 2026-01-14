@@ -118,7 +118,7 @@ public class CellActionManager : MonoBehaviour
                     club.Manager = null;
                     onCompleted(false);
                     GameManager.MatchStatsData.clubsBought++;
-                    GameManager.StatsManager.AddToStat("expenses", club.Price);
+                    GameManager.StatsManager.AddToStat("expenses", (ulong)club.Price);
                 }
                 else
                 {
@@ -199,7 +199,7 @@ public class CellActionManager : MonoBehaviour
                 MoneyPayer.SetPayment(payment);
                 Bank.AddMoney(owner, payment);
                 onCompleted(false);
-                GameManager.StatsManager.AddToStat("expenses", payment);
+                GameManager.StatsManager.AddToStat("expenses", (ulong)payment);
             }
             else // противник платить
             {
@@ -207,7 +207,7 @@ public class CellActionManager : MonoBehaviour
 
                 if (!canPay)
                 {
-                    Bank.AddMoney(owner, player.MoneySum); // оплата, що лишилося у гравця, який платить
+                    Bank.AddMoney(owner, (int)player.MoneySum); // оплата, що лишилося у гравця, який платить
                     yield return DeclareBankruptcy(player);
                     onCompleted(true);
                     yield break;
@@ -218,8 +218,8 @@ public class CellActionManager : MonoBehaviour
 
                 if (owner.Opponent == null)
                 {
-                    GameManager.StatsManager.AddToStat("income", payment);
-                    if (GameManager.StatsManager.GetStat("maxBudget") <= owner.MoneySum)
+                    GameManager.StatsManager.AddToStat("income", (ulong)payment);
+                    if ((uint)GameManager.StatsManager.GetStat("maxBudget") <= owner.MoneySum)
                         GameManager.StatsManager.AddToStat("maxBudget", owner.MoneySum);
                 }
             }
@@ -240,7 +240,7 @@ public class CellActionManager : MonoBehaviour
                     MoneyPayer.SetPayment(telecompany.Price);
                     onCompleted(false);
                     GameManager.MatchStatsData.telecompaniesBought++;
-                    GameManager.StatsManager.AddToStat("expenses", telecompany.Price);
+                    GameManager.StatsManager.AddToStat("expenses", (ulong)telecompany.Price);
                 }
                 else
                 {
@@ -309,7 +309,7 @@ public class CellActionManager : MonoBehaviour
         Bank.AddMoney(player, bonus.Value);
         if (player.Opponent == null)
         {
-            GameManager.StatsManager.AddToStat("income", bonus.Value);
+            GameManager.StatsManager.AddToStat("income", (ulong)bonus.Value);
             if (GameManager.StatsManager.GetStat("maxBudget") <= player.MoneySum)
                 GameManager.StatsManager.AddToStat("maxBudget", player.MoneySum);
         }
@@ -339,7 +339,7 @@ public class CellActionManager : MonoBehaviour
             }
 
             Bank.TakeMoney(player, fine.Value);
-            GameManager.StatsManager.AddToStat("expenses", fine.Value);
+            GameManager.StatsManager.AddToStat("expenses", (ulong)fine.Value);
             onCompleted(true);
         }
     }
@@ -369,7 +369,7 @@ public class CellActionManager : MonoBehaviour
 
             Bank.TakeMoney(player, tax);
             onCompleted(true);
-            GameManager.StatsManager.AddToStat("expenses", tax);
+            GameManager.StatsManager.AddToStat("expenses", (ulong)tax);
         }
     }
 
@@ -414,7 +414,7 @@ public class CellActionManager : MonoBehaviour
             {
                 MoneyPayer.SetPayment(payment);
                 Bank.AddMoney(host, MoneyPayer.RequiredMoney);
-                GameManager.StatsManager.AddToStat("expenses", payment);
+                GameManager.StatsManager.AddToStat("expenses", (ulong)payment);
             }
             else // противник платить
             {
@@ -422,7 +422,7 @@ public class CellActionManager : MonoBehaviour
 
                 if (!canPay)
                 {
-                    Bank.AddMoney(host, guest.MoneySum); // оплата, що лишилося у гравця, який платить
+                    Bank.AddMoney(host, (int)guest.MoneySum); // оплата, що лишилося у гравця, який платить
                     yield return DeclareBankruptcy(guest);
                     yield break;
                 }
@@ -504,7 +504,7 @@ public class CellActionManager : MonoBehaviour
             {
                 MoneyPayer.SetPayment(payment);
                 Bank.AddMoney(host, MoneyPayer.RequiredMoney);
-                GameManager.StatsManager.AddToStat("expenses", payment);
+                GameManager.StatsManager.AddToStat("expenses", (ulong)payment);
             }
             else // противник платить
             {
@@ -512,7 +512,7 @@ public class CellActionManager : MonoBehaviour
 
                 if (!canPay)
                 {
-                    Bank.AddMoney(host, guest.MoneySum);
+                    Bank.AddMoney(host, (int)guest.MoneySum);
                     yield return DeclareBankruptcy(guest);
                     yield break;
                 }
@@ -521,7 +521,7 @@ public class CellActionManager : MonoBehaviour
                 Bank.AddMoney(host, payment);
                 if (winner.Opponent == null)
                 {
-                    GameManager.StatsManager.AddToStat("income", payment);
+                    GameManager.StatsManager.AddToStat("income", (ulong)payment);
                     if (GameManager.StatsManager.GetStat("maxBudget") <= winner.MoneySum)
                         GameManager.StatsManager.AddToStat("maxBudget", winner.MoneySum);
                 }
@@ -534,7 +534,7 @@ public class CellActionManager : MonoBehaviour
             {
                 MoneyPayer.SetPayment(payment);
                 Bank.AddMoney(guest, MoneyPayer.RequiredMoney);
-                GameManager.StatsManager.AddToStat("expenses", payment);
+                GameManager.StatsManager.AddToStat("expenses", (ulong)payment);
             }
             else // противник платить
             {
@@ -542,7 +542,7 @@ public class CellActionManager : MonoBehaviour
 
                 if (!canPay)
                 {
-                    Bank.AddMoney(guest, guest.MoneySum);
+                    Bank.AddMoney(guest, (int)guest.MoneySum);
                     yield return DeclareBankruptcy(guest);
                     yield break;
                 }
@@ -551,7 +551,7 @@ public class CellActionManager : MonoBehaviour
                 Bank.AddMoney(guest, payment);
                 if (winner.Opponent == null)
                 {
-                    GameManager.StatsManager.AddToStat("income", payment);
+                    GameManager.StatsManager.AddToStat("income", (ulong)payment);
                     if (GameManager.StatsManager.GetStat("maxBudget") <= winner.MoneySum)
                         GameManager.StatsManager.AddToStat("maxBudget", winner.MoneySum);
                 }
