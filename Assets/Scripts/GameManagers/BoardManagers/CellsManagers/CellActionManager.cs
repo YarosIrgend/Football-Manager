@@ -559,7 +559,9 @@ public class CellActionManager : MonoBehaviour
         }
         
         guestClub.IsPlayable = false;
-
+        
+        MoveClubToEnd(guest, guestClub);
+        
         if (winner is { Opponent: null })
         {
             GameManager.MatchStatsData.matchWins++;
@@ -646,5 +648,18 @@ public class CellActionManager : MonoBehaviour
     {
         var transferButton = GameObject.Find("Canvas/TransferFlowController/TransferButton");
         transferButton.SetActive(active);
+    }
+    
+    private void MoveClubToEnd(Player player, Club club)
+    {
+        if (club == null)
+            return;
+
+        int index = player.Clubs.IndexOf(club);
+        if (index == -1)
+            return;
+
+        player.Clubs.RemoveAt(index);
+        player.Clubs.Add(club);
     }
 }
