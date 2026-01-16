@@ -400,13 +400,13 @@ public class CellActionManager : MonoBehaviour
             yield break;
         }
 
-        var guestClub = guest.Clubs.FirstOrDefault(club => club.IsPlayable);
+        var guestClub = guest.Clubs.FirstOrDefault(club => club.IsPlayable && club.Footballer != null);
 
         // якщо вільного гостьового клубу нема, то технічна поразка
         int payment;
         if (guestClub == null)
         {
-            MessagePanelController.Instance.Show("У гостя нема клубів не в запасі");
+            MessagePanelController.Instance.Show("У гостя нема доступних клубів для гри на виїзді");
             yield return new WaitForSeconds(1.5f);
             MessagePanelController.Instance.Show($"Технічна поразка, оплата {MatchPaymentSum(hostClub)}");
             yield return new WaitForSeconds(1.5f);
