@@ -1,17 +1,15 @@
 ﻿public static class MinimaxSolver
 {
-    public static float Evaluate(GameState state, SimulatedAction action, int depth)
+    public static float Evaluate(GameState state, Property property, int depth)
     {
-        GameState newState = state.Clone();
+        state.Money -= property.Price;
 
-        newState.Money -= action.Property.Price;
-
-        if (action.Property is Club)
-            newState.ClubCount++;
+        if (property is Club)
+            state.ClubCount++;
         else
-            newState.TelecompanyCount++;
+            state.TelecompanyCount++;
 
-        return Score(newState);
+        return Score(state);
     }
 
     private static float Score(GameState state)

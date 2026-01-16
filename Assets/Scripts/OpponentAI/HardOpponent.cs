@@ -6,7 +6,7 @@ public class HardOpponent : Opponent
 {
     public HardOpponent()
     {
-        mistakeChance = 0.1f;
+        mistakeChance = 0.2f;
     }
 
     public override bool DecideBuyProperty(Game game, Player self, Property property)
@@ -19,13 +19,13 @@ public class HardOpponent : Opponent
 
         return smartDecision;
     }
-    
+
     public override bool TryResolveMoney(Player self, int requiredMoney)
     {
         Init();
         return DecisionService.TryResolveMoney(self, requiredMoney);
     }
-    
+
     public override IEnumerator HandleTransfer(Player self)
     {
         Init();
@@ -33,7 +33,7 @@ public class HardOpponent : Opponent
         if (club == null)
             yield break;
 
-        int money = MoneyUtils.GetTotalMoney(self);
+        var money = self.MoneySum;
         if (money < 1_000_000)
             yield break;
 
@@ -61,13 +61,24 @@ public class HardOpponent : Opponent
 
     private IEnumerator BuyBestFootballer(Player self, Club club)
     {
-        var best = TransferManager.Footballers
-            .Where(f => f.Price <= MoneyUtils.GetTotalMoney(self))
-            .OrderByDescending(f => f.Points)
-            .FirstOrDefault();
+        Footballer best;
+        if (Random.value < mistakeChance)
+        {
+            var random = new System.Random();
+            var num = random.Next(1, 6);
+            best = TransferManager.Footballers[num];
+        }
+        else
+        {
+            best = TransferManager.Footballers
+                .Where(f => f.Price <= self.MoneySum)
+                .OrderByDescending(f => f.Points)
+                .FirstOrDefault();
+        }
 
         if (best == null)
             yield break;
+
 
         Bank.TakeMoney(self, best.Price);
         club.Footballer = best;
@@ -78,10 +89,20 @@ public class HardOpponent : Opponent
 
     private IEnumerator BuyBestTrainer(Player self, Club club)
     {
-        var best = TransferManager.Trainers
-            .Where(t => t.Price <= MoneyUtils.GetTotalMoney(self))
-            .OrderByDescending(t => t.Points)
-            .FirstOrDefault();
+        Trainer best;
+        if (Random.value < mistakeChance)
+        {
+            var random = new System.Random();
+            var num = random.Next(1, 4);
+            best = TransferManager.Trainers[num];
+        }
+        else
+        {
+            best = TransferManager.Trainers
+                .Where(t => t.Price <= self.MoneySum)
+                .OrderByDescending(t => t.Points)
+                .FirstOrDefault();
+        }
 
         if (best == null)
             yield break;

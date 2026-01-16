@@ -6,7 +6,7 @@ public abstract class Opponent
 
     protected Bank Bank;
     protected TransferManager TransferManager;
-    protected OpponentDecisionService DecisionService;
+    protected DecisionService DecisionService;
 
     private bool initialized;
     
@@ -18,7 +18,7 @@ public abstract class Opponent
         Bank = UnityEngine.Object.FindFirstObjectByType<Bank>();
         TransferManager = UnityEngine.Object.FindFirstObjectByType<TransferManager>();
 
-        DecisionService = new OpponentDecisionService(Bank);
+        DecisionService = new DecisionService(Bank);
 
         initialized = true;
     }

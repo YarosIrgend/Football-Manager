@@ -12,14 +12,14 @@ public class EasyOpponent : Opponent
     public override bool DecideBuyProperty(Game game, Player self, Property property)
     {
         if (RollMistake())
-            return UnityEngine.Random.value > 0.5f;
+            return Random.value > 0.5f;
 
-        return MoneyUtils.GetTotalMoney(self) >= property.Price;
+        return self.MoneySum >= property.Price;
     }
 
     public override bool TryResolveMoney(Player self, int requiredMoney)
     {
-        return MoneyUtils.GetTotalMoney(self) >= requiredMoney;
+        return self.MoneySum >= requiredMoney;
     }
 
     public override IEnumerator HandleTransfer(Player self)
@@ -50,7 +50,7 @@ public class EasyOpponent : Opponent
     private IEnumerator TryBuyFootballer(Player self, Club club)
     {
         var f = TransferManager.Footballers.GetRandomItem();
-        if (MoneyUtils.GetTotalMoney(self) < f.Price)
+        if (self.MoneySum < f.Price)
             yield break;
 
         Bank.TakeMoney(self, f.Price);
@@ -63,7 +63,7 @@ public class EasyOpponent : Opponent
     private IEnumerator TryBuyTrainer(Player self, Club club)
     {
         var t = TransferManager.Trainers.GetRandomItem();
-        if (MoneyUtils.GetTotalMoney(self) < t.Price)
+        if (self.MoneySum < t.Price)
             yield break;
 
         Bank.TakeMoney(self, t.Price);
@@ -76,7 +76,7 @@ public class EasyOpponent : Opponent
     private IEnumerator TryBuyManager(Player self, Club club)
     {
         var m = TransferManager.Manager;
-        if (MoneyUtils.GetTotalMoney(self) < m.Price)
+        if (self.MoneySum < m.Price)
             yield break;
 
         Bank.TakeMoney(self, m.Price);

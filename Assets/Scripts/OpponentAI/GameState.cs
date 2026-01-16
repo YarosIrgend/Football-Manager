@@ -13,9 +13,4 @@
             TelecompanyCount = self.Telecompanies.Count
         };
     }
-
-    public GameState Clone()
-    {
-        return (GameState)MemberwiseClone();
-    }
 }

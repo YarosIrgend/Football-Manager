@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-public class OpponentDecisionService
+public class DecisionService
 {
     private readonly Bank bank;
 
-    public OpponentDecisionService(Bank bank)
+    public DecisionService(Bank bank)
     {
         this.bank = bank;
     }
@@ -14,8 +14,7 @@ public class OpponentDecisionService
     {
         GameState state = GameState.FromGame(game, self);
 
-        SimulatedAction buyAction = SimulatedAction.Buy(property);
-        float score = MinimaxSolver.Evaluate(state, buyAction, depth: 2);
+        float score = MinimaxSolver.Evaluate(state, property, depth: 3);
 
         return score > 0;
     }
@@ -54,13 +53,13 @@ public class OpponentDecisionService
         return false;
     }
 
-    private IEnumerable<Property> GetAllProperties(Player player)
+    private static IEnumerable<Property> GetAllProperties(Player player)
     {
         foreach (var c in player.Clubs) yield return c;
         foreach (var t in player.Telecompanies) yield return t;
     }
 
-    private void RemoveProperty(Player player, Property property)
+    private static void RemoveProperty(Player player, Property property)
     {
         if (property is Club c)
             player.Clubs.Remove(c);
