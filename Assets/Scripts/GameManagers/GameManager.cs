@@ -10,6 +10,8 @@ using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour
 {
+    public static float messageDelaySeconds = 2.5f;
+    
     [Header("Managers")] public BoardManager BoardManager;
     public StatsManager StatsManager;
     public MatchStatsData MatchStatsData;
@@ -146,7 +148,7 @@ public class GameManager : MonoBehaviour
         if (!CurrentPlayer.IsPlayable)
         {
             MessagePanelController.Instance.Show("Ви пропускаєте хід");
-            yield return new WaitForSeconds(1.5f);
+            yield return new WaitForSeconds(messageDelaySeconds);
 
             CurrentPlayer.IsPlayable = true;
 
@@ -158,7 +160,7 @@ public class GameManager : MonoBehaviour
         //var cells = 2;
         var cells = ThrowDices();
         MessagePanelController.Instance.Show($"Випало: {cells}");
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(messageDelaySeconds);
 
         EndTurnButton.SetActive(true);
         yield return StartCoroutine(MovePlayerChipCoroutine(cells));
@@ -204,16 +206,16 @@ public class GameManager : MonoBehaviour
         while (CurrentPlayerIndex != 0)
         {
             MessagePanelController.Instance.Show($"Хід наступного противника: {CurrentPlayer.ColorString}");
-            yield return new WaitForSeconds(1.5f);
+            yield return new WaitForSeconds(messageDelaySeconds);
 
             if (!CurrentPlayer.IsPlayable)
             {
                 MessagePanelController.Instance.Show($"{CurrentPlayer.ColorString} пропускає хід");
-                yield return new WaitForSeconds(1.5f);
+                yield return new WaitForSeconds(messageDelaySeconds);
                 CurrentPlayer.IsPlayable = true;
                 SetNextPlayer();
                 MessagePanelController.Instance.Show($"Хід наступного противника: {CurrentPlayer.ColorString}");
-                yield return new WaitForSeconds(1.5f);
+                yield return new WaitForSeconds(messageDelaySeconds);
             }
 
             yield return StartCoroutine(OpponentTurnCoroutine());
@@ -229,7 +231,7 @@ public class GameManager : MonoBehaviour
         var cells = ThrowDices();
 
         MessagePanelController.Instance.Show($"Випало: {cells}");
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(messageDelaySeconds);
 
         yield return StartCoroutine(MovePlayerChipCoroutine(cells));
 

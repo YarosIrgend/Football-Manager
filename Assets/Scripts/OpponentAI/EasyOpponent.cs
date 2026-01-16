@@ -57,7 +57,7 @@ public class EasyOpponent : Opponent
         club.Footballer = f;
         MessagePanelController.Instance.Show($"{self.ColorString} придбав у команду {club.Name}" +
                                              $" {f.Points}-очкового футболіста");
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(GameManager.messageDelaySeconds);
     }
 
     private IEnumerator TryBuyTrainer(Player self, Club club)
@@ -70,7 +70,7 @@ public class EasyOpponent : Opponent
         club.Trainer = t;
         MessagePanelController.Instance.Show($"{self.ColorString} придбав у команду {club.Name}" +
                                              $" {t.Points}-очкового тренера");
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(GameManager.messageDelaySeconds);
     }
 
     private IEnumerator TryBuyManager(Player self, Club club)
@@ -83,6 +83,6 @@ public class EasyOpponent : Opponent
         club.Manager = m;
         MessagePanelController.Instance.Show($"{self.ColorString} придбав у команду {club.Name}" +
                                              " менеджера");
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(GameManager.messageDelaySeconds);
     }
 }

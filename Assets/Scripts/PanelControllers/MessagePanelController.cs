@@ -17,7 +17,7 @@ public class MessagePanelController : MonoBehaviour
             Destroy(gameObject);
     }
 
-    public void Show(string message, float duration = 1.5f)
+    public void Show(string message, float duration = 2.5f)
     {
         // якщо вже щось показується — скидаємо
         if (currentCoroutine != null)

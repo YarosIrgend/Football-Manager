@@ -55,7 +55,7 @@ public class HardOpponent : Opponent
             club.Manager = TransferManager.Manager;
             MessagePanelController.Instance.Show($"{self.ColorString} придбав у команду {club.Name}" +
                                                  " менеджера");
-            yield return new WaitForSeconds(1.5f);
+            yield return new WaitForSeconds(GameManager.messageDelaySeconds);
         }
     }
 
@@ -84,7 +84,7 @@ public class HardOpponent : Opponent
         club.Footballer = best;
         MessagePanelController.Instance.Show($"{self.ColorString} придбав у команду {club.Name}" +
                                              $" {best.Points}-очкового футболіста");
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(GameManager.messageDelaySeconds);
     }
 
     private IEnumerator BuyBestTrainer(Player self, Club club)
@@ -111,6 +111,6 @@ public class HardOpponent : Opponent
         club.Trainer = best;
         MessagePanelController.Instance.Show($"{self.ColorString} придбав у команду {club.Name}" +
                                              $" {best.Points}-очкового тренера");
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(GameManager.messageDelaySeconds);
     }
 }

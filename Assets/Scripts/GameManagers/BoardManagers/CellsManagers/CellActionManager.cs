@@ -76,7 +76,7 @@ public class CellActionManager : MonoBehaviour
     private IEnumerator HandleClubCoroutine(Game game, Cell cell, Player player, Action<bool> onCompleted)
     {
         MessagePanelController.Instance.Show($"Клуб - {cell.CellName}");
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(GameManager.messageDelaySeconds);
 
         var club =
             GameManager.Game.Clubs.FirstOrDefault(t => t.Name == cell.CellName);
@@ -93,7 +93,7 @@ public class CellActionManager : MonoBehaviour
 
             MessagePanelController.Instance.Show(
                 $"Є гравець {owner.ColorString}, який володіє цим клубом.");
-            yield return new WaitForSeconds(1.5f);
+            yield return new WaitForSeconds(GameManager.messageDelaySeconds);
 
             var ownerClub = owner.Clubs.FirstOrDefault(t => t.Name == cell.CellName);
             // якщо клуб є, треба провести матч за можливості
@@ -153,7 +153,7 @@ public class CellActionManager : MonoBehaviour
                 player.Clubs.Add(club);
 
                 MessagePanelController.Instance.Show($"Гравець {player.ColorString} купив клуб {club.Name}");
-                yield return new WaitForSeconds(1.5f);
+                yield return new WaitForSeconds(GameManager.messageDelaySeconds);
                 onCompleted(true);
             }
         }
@@ -162,7 +162,7 @@ public class CellActionManager : MonoBehaviour
     private IEnumerator HandleTelecompanyCoroutine(Game game, Cell cell, Player player, Action<bool> onCompleted)
     {
         MessagePanelController.Instance.Show($"Телекомпанія - {cell.CellName}");
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(GameManager.messageDelaySeconds);
 
         var telecompany =
             GameManager.Game.Telecompanies.FirstOrDefault(t => t.Name == cell.CellName);
@@ -179,12 +179,12 @@ public class CellActionManager : MonoBehaviour
 
             MessagePanelController.Instance.Show(
                 $"Є гравець {owner.ColorString}, який володіє цією компанією. Усього: {owner.Telecompanies.Count}");
-            yield return new WaitForSeconds(1.5f);
+            yield return new WaitForSeconds(GameManager.messageDelaySeconds);
 
             if (telecompany.IsMortgaged)
             {
                 MessagePanelController.Instance.Show("Телекомпанія закладена");
-                yield return new WaitForSeconds(1.5f);
+                yield return new WaitForSeconds(GameManager.messageDelaySeconds);
                 yield break;
             }
 
@@ -198,6 +198,14 @@ public class CellActionManager : MonoBehaviour
 
             if (player.Opponent == null) // наш гравець платить
             {
+                if (!AbleToPay(player, payment))
+                {
+                    MessagePanelController.Instance.Show("Ви не маєте змоги оплатити");
+                    yield return new WaitForSeconds(GameManager.messageDelaySeconds);
+                    yield return DeclareBankruptcy(player);
+                    yield break;
+                }
+
                 MoneyPayer.SetPayment(payment);
                 Bank.AddMoney(owner, payment);
                 onCompleted(false);
@@ -271,7 +279,7 @@ public class CellActionManager : MonoBehaviour
                 player.Telecompanies.Add(telecompany);
                 MessagePanelController.Instance.Show(
                     $"Гравець {player.ColorString} купив телекомпанію {telecompany.Name}");
-                yield return new WaitForSeconds(1.5f);
+                yield return new WaitForSeconds(GameManager.messageDelaySeconds);
                 onCompleted(true);
             }
         }
@@ -306,7 +314,7 @@ public class CellActionManager : MonoBehaviour
         var bonus = game.Bonuses.GetRandomItem();
 
         MessagePanelController.Instance.Show($"Бонус: {bonus.Value:N0}");
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(GameManager.messageDelaySeconds);
 
         Bank.AddMoney(player, bonus.Value);
         if (player.Opponent == null)
@@ -322,10 +330,17 @@ public class CellActionManager : MonoBehaviour
         var fine = game.Fines.GetRandomItem();
 
         MessagePanelController.Instance.Show($"Штраф: {fine.Value:N0}");
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(GameManager.messageDelaySeconds);
 
         if (player.Opponent == null) // наш гравець платить
         {
+            if (!AbleToPay(player, fine.Value))
+            {
+                MessagePanelController.Instance.Show("Ви не маєте змоги оплатити");
+                yield return new WaitForSeconds(GameManager.messageDelaySeconds);
+                yield return DeclareBankruptcy(player);
+                yield break;
+            }
             MoneyPayer.SetPayment(fine.Value);
             onCompleted(false);
         }
@@ -351,10 +366,17 @@ public class CellActionManager : MonoBehaviour
         int tax = 1_000_000;
 
         MessagePanelController.Instance.Show($"Податок: {tax:N0}");
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(GameManager.messageDelaySeconds);
 
         if (player.Opponent == null)
         {
+            if (!AbleToPay(player, tax))
+            {
+                MessagePanelController.Instance.Show("Ви не маєте змоги оплатити");
+                yield return new WaitForSeconds(GameManager.messageDelaySeconds);
+                yield return DeclareBankruptcy(player);
+                yield break;
+            }
             MoneyPayer.SetPayment(tax);
             onCompleted(false);
         }
@@ -379,7 +401,7 @@ public class CellActionManager : MonoBehaviour
     {
         MessagePanelController.Instance.Show($"Гравець {player.ColorString} отримує дискваліфікацію " +
                                              "(пропускає хід)");
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(GameManager.messageDelaySeconds);
 
         player.IsPlayable = false;
     }
@@ -389,14 +411,14 @@ public class CellActionManager : MonoBehaviour
         if (!hostClub.IsPlayable || hostClub.Footballer == null)
         {
             MessagePanelController.Instance.Show("Домашній клуб не може грати");
-            yield return new WaitForSeconds(1.5f);
+            yield return new WaitForSeconds(GameManager.messageDelaySeconds);
             yield break;
         }
 
         if (guest.Clubs.Count == 0)
         {
             MessagePanelController.Instance.Show("У гостя нема клубів");
-            yield return new WaitForSeconds(1.5f);
+            yield return new WaitForSeconds(GameManager.messageDelaySeconds);
             yield break;
         }
 
@@ -407,13 +429,20 @@ public class CellActionManager : MonoBehaviour
         if (guestClub == null)
         {
             MessagePanelController.Instance.Show("У гостя нема доступних клубів для гри на виїзді");
-            yield return new WaitForSeconds(1.5f);
+            yield return new WaitForSeconds(GameManager.messageDelaySeconds);
             MessagePanelController.Instance.Show($"Технічна поразка, оплата {MatchPaymentSum(hostClub):N0}");
-            yield return new WaitForSeconds(1.5f);
+            yield return new WaitForSeconds(GameManager.messageDelaySeconds);
 
             payment = MatchPaymentSum(hostClub);
             if (guest.Opponent == null) // наш гравець платить
             {
+                if (!AbleToPay(guest, payment))
+                {
+                    MessagePanelController.Instance.Show("Ви не маєте змоги оплатити");
+                    yield return new WaitForSeconds(GameManager.messageDelaySeconds);
+                    yield return DeclareBankruptcy(guest);
+                    yield break;
+                }
                 MoneyPayer.SetPayment(payment);
                 Bank.AddMoney(host, MoneyPayer.RequiredMoney);
                 GameManager.StatsManager.AddToStat("expenses", (ulong)payment);
@@ -439,43 +468,43 @@ public class CellActionManager : MonoBehaviour
         // якщо є проводиться матч
         MessagePanelController.Instance.Show($"Матч між {hostClub.Name} ({host.ColorString})" +
                                              $" проти {guestClub.Name} ({guest.ColorString})");
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(GameManager.messageDelaySeconds);
 
         // хід господаря
         MessagePanelController.Instance.Show($"Хід {hostClub.Name} ({host.ColorString})");
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(GameManager.messageDelaySeconds);
 
         int hostPoints = GameManager.ThrowDices();
         MessagePanelController.Instance.Show($"Випало: {hostPoints}");
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(GameManager.messageDelaySeconds);
 
         hostPoints += hostClub.Footballer.Points;
         MessagePanelController.Instance.Show($"Плюс {hostClub.Footballer.Points} очок гравця: {hostPoints}");
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(GameManager.messageDelaySeconds);
 
         if (hostClub.Trainer != null)
         {
             hostPoints += hostClub.Trainer.Points;
             MessagePanelController.Instance.Show($"Плюс {hostClub.Trainer.Points} очок тренера: {hostPoints}");
-            yield return new WaitForSeconds(1.5f);
+            yield return new WaitForSeconds(GameManager.messageDelaySeconds);
         }
 
         // хід гостя
         MessagePanelController.Instance.Show($"Хід {guestClub.Name} ({guest.ColorString})");
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(GameManager.messageDelaySeconds);
         int guestPoints = GameManager.ThrowDices();
         MessagePanelController.Instance.Show($"Випало: {guestPoints}");
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(GameManager.messageDelaySeconds);
 
         guestPoints += guestClub.Footballer.Points;
         MessagePanelController.Instance.Show($"Плюс {guestClub.Footballer.Points} очок гравця: {guestPoints}");
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(GameManager.messageDelaySeconds);
 
         if (guestClub.Trainer != null)
         {
             guestPoints += guestClub.Trainer.Points;
             MessagePanelController.Instance.Show($"Плюс {guestClub.Trainer.Points} очок тренера: {guestPoints}");
-            yield return new WaitForSeconds(1.5f);
+            yield return new WaitForSeconds(GameManager.messageDelaySeconds);
         }
 
         // вивести переможця
@@ -497,13 +526,20 @@ public class CellActionManager : MonoBehaviour
             MessagePanelController.Instance.Show("Нічия");
         }
 
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(GameManager.messageDelaySeconds);
 
         if (winner == host)
         {
             payment = MatchPaymentSum(hostClub);
             if (guest.Opponent == null) // наш гравець платить
             {
+                if (!AbleToPay(guest, payment))
+                {
+                    MessagePanelController.Instance.Show("Ви не маєте змоги оплатити");
+                    yield return new WaitForSeconds(GameManager.messageDelaySeconds);
+                    yield return DeclareBankruptcy(guest);
+                    yield break;
+                }
                 MoneyPayer.SetPayment(payment);
                 Bank.AddMoney(host, MoneyPayer.RequiredMoney);
                 GameManager.StatsManager.AddToStat("expenses", (ulong)payment);
@@ -534,6 +570,13 @@ public class CellActionManager : MonoBehaviour
             payment = MatchPaymentSum(guestClub);
             if (host.Opponent == null) // наш гравець платить
             {
+                if (!AbleToPay(host, payment))
+                {
+                    MessagePanelController.Instance.Show("Ви не маєте змоги оплатити");
+                    yield return new WaitForSeconds(GameManager.messageDelaySeconds);
+                    yield return DeclareBankruptcy(guest);
+                    yield break;
+                }
                 MoneyPayer.SetPayment(payment);
                 Bank.AddMoney(guest, MoneyPayer.RequiredMoney);
                 GameManager.StatsManager.AddToStat("expenses", (ulong)payment);
@@ -593,6 +636,7 @@ public class CellActionManager : MonoBehaviour
             {
                 text.text = "Недостатньо коштів";
                 text.color = Color.red;
+                return;
             }
 
             BuyChoice = true;
@@ -638,7 +682,7 @@ public class CellActionManager : MonoBehaviour
         MessagePanelController.Instance.Show(
             $"Гравець {player.ColorString} банкрот і вибуває з гри"
         );
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(GameManager.messageDelaySeconds);
 
         //  якщо це наш гравець - гра завершена
         if (player.Opponent == null)
@@ -664,5 +708,12 @@ public class CellActionManager : MonoBehaviour
 
         player.Clubs.RemoveAt(index);
         player.Clubs.Add(club);
+    }
+
+    private bool AbleToPay(Player player, int paymentSum)
+    {
+        var money = player.MoneySum;
+        money += (uint)player.Clubs.Sum(club => club.Price) + (uint)player.Telecompanies.Sum(tele => tele.Price);
+        return money >= paymentSum;
     }
 }
