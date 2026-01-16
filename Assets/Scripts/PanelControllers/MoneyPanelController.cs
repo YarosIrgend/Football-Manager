@@ -1,3 +1,4 @@
+using System.Globalization;
 using TMPro;
 using UnityEngine;
 
@@ -11,7 +12,7 @@ public class MoneyPanelController : MonoBehaviour
         ShowMoneySum(player);
     }
 
-    private void ShowBanknotes(Player player)
+    private static void ShowBanknotes(Player player)
     {
         var banknoteNames = new[]
             { "Banknote5M", "Banknote2M", "Banknote1M", "Banknote500K", "Banknote200K", "Banknote100K" };
@@ -24,9 +25,11 @@ public class MoneyPanelController : MonoBehaviour
         }
     }
 
-    private void ShowMoneySum(Player player)
+    private static void ShowMoneySum(Player player)
     {
+        NumberFormatInfo nfi = new CultureInfo("en-US", false).NumberFormat;
+        nfi.NumberGroupSeparator = " ";
         var moneySumText = GameObject.Find("Sum").GetComponent<TextMeshProUGUI>();
-        moneySumText.text = $"Сума: {player.MoneySum.ToString()}";
+        moneySumText.text = $"Сума: {player.MoneySum.ToString("N", nfi)}";
     }
 }

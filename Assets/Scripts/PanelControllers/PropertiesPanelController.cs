@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections;
+using System.Globalization;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -125,10 +126,10 @@ public class PropertiesPanelController : MonoBehaviour
                 StatsManager.AddToStat("income", (ulong)telecompany.Price / 2);
                 break;
         }
-    
+
         if (StatsManager.GetStat("maxBudget") <= selectedPlayer.MoneySum)
             StatsManager.AddToStat("maxBudget", selectedPlayer.MoneySum);
-        
+
         MessagePanelController.Instance.Show("Закладено");
         yield return new WaitForSeconds(1.5f);
         CloseClubInfoPanel();
@@ -252,14 +253,18 @@ public class PropertiesPanelController : MonoBehaviour
             RedeemPropertyButton.gameObject.SetActive(false);
         }
 
+        NumberFormatInfo nfi = new CultureInfo("en-US", false).NumberFormat;
+        nfi.NumberGroupSeparator = " ";
+
         Transform clubInfo = ClubInfoPanel.transform.Find("ClubInfo");
 
         CreateRow("NameRow", clubInfo, $"Назва:   {club.Name}");
-        CreateRow("PriceRow", clubInfo, $"Ціна:   {club.Price}");
-        CreateRow("MortgagePriceRow", clubInfo, $"Ціна закладення:   {club.Price / 2}");
-        CreateRow("IncomeWithPlayerRow", clubInfo, $"Дохід з гравцем:   {club.IncomeWithPlayer}");
-        CreateRow("IncomeWithTrainerRow", clubInfo, $"Дохід з тренером:   {club.IncomeWithTrainer}");
-        CreateRow("IncomeWithManagerRow", clubInfo, $"Дохід з менеджером:   {club.IncomeWithManager}");
+        CreateRow("PriceRow", clubInfo, $"Ціна:   {club.Price.ToString("N", nfi)}");
+        CreateRow("MortgagePriceRow", clubInfo, $"Ціна закладення:   {(club.Price / 2).ToString("N", nfi)}");
+        CreateRow("IncomeWithPlayerRow", clubInfo, $"Дохід з гравцем:   {club.IncomeWithPlayer.ToString("N", nfi)}");
+        CreateRow("IncomeWithTrainerRow", clubInfo, $"Дохід з тренером:   {club.IncomeWithTrainer.ToString("N", nfi)}");
+        CreateRow("IncomeWithManagerRow", clubInfo,
+            $"Дохід з менеджером:   {club.IncomeWithManager.ToString("N", nfi)}");
 
         CreateRow(
             "FootballerRow",
@@ -351,13 +356,15 @@ public class PropertiesPanelController : MonoBehaviour
 
     private void SetClubDataForTransfer(Club club)
     {
+        NumberFormatInfo nfi = new CultureInfo("en-US", false).NumberFormat;
+        nfi.NumberGroupSeparator = " ";
         Transform clubInfo = ClubInfoPanelForTransfer.transform.Find("ClubInfo");
 
         CreateRow("NameRow", clubInfo, $"Назва:   {club.Name}");
-        CreateRow("PriceRow", clubInfo, $"Ціна:   {club.Price}");
-        CreateRow("IncomeWithPlayerRow", clubInfo, $"Дохід з гравцем:   {club.IncomeWithPlayer}");
-        CreateRow("IncomeWithTrainerRow", clubInfo, $"Дохід з тренером:   {club.IncomeWithTrainer}");
-        CreateRow("IncomeWithManagerRow", clubInfo, $"Дохід з менеджером:   {club.IncomeWithManager}");
+        CreateRow("PriceRow", clubInfo, $"Ціна:   {club.Price.ToString("N", nfi)}");
+        CreateRow("IncomeWithPlayerRow", clubInfo, $"Дохід з гравцем:   {club.IncomeWithPlayer.ToString("N", nfi)}");
+        CreateRow("IncomeWithTrainerRow", clubInfo, $"Дохід з тренером:   {club.IncomeWithTrainer.ToString("N", nfi)}");
+        CreateRow("IncomeWithManagerRow", clubInfo, $"Дохід з менеджером:   {club.IncomeWithManager.ToString("N", nfi)}");
 
         CreateRow(
             "FootballerRow",
@@ -427,7 +434,7 @@ public class PropertiesPanelController : MonoBehaviour
             scrollView.SetActive(false);
         ClubsPanelForTransfer.SetActive(false);
     }
-    
+
     public void OnSellFootballerClicked()
     {
         if (selectedClub == null)

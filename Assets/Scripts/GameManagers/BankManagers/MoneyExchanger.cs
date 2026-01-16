@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using System.Globalization;
+using TMPro;
 using UnityEngine;
 
 public class MoneyExchanger : MonoBehaviour
@@ -74,8 +75,10 @@ public class MoneyExchanger : MonoBehaviour
 
     private void UpdateGivenMoneySum()
     {
+        NumberFormatInfo nfi = new CultureInfo("en-US", false).NumberFormat;
+        nfi.NumberGroupSeparator = " ";
         var sum = BankMoneyPanel.transform.Find("Sum").GetComponent<TextMeshProUGUI>();
-        sum.text = $"Дано: {GivenMoney}";
+        sum.text = $"Дано: {GivenMoney.ToString("N", nfi)}";
     }
     
     public void OnMouseDown()

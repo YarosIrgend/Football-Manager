@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using System.Globalization;
+using TMPro;
 using UnityEngine;
 
 // панель для давання коштів в банк
@@ -74,14 +75,18 @@ public class MoneyPayer : MonoBehaviour
 
     private void UpdateGivenMoneySum()
     {
+        NumberFormatInfo nfi = new CultureInfo("en-US", false).NumberFormat;
+        nfi.NumberGroupSeparator = " ";
         var sum = BankMoneyPanel.transform.Find("Sum").GetComponent<TextMeshProUGUI>();
-        sum.text = $"Потрібно: {RequiredMoney}";
+        sum.text = $"Потрібно: {RequiredMoney.ToString("N", nfi)}";
     }
 
     private void ShowMoneySum()
     {
+        NumberFormatInfo nfi = new CultureInfo("en-US", false).NumberFormat;
+        nfi.NumberGroupSeparator = " ";
         var moneySumText = GameObject.Find("Sum").GetComponent<TextMeshProUGUI>();
-        moneySumText.text = $"Сума: {Player.MoneySum.ToString()}";
+        moneySumText.text = $"Сума: {Player.MoneySum.ToString("N", nfi)}";
     }
 
     public void OnMouseDown()
