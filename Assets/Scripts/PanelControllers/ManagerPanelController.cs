@@ -40,7 +40,7 @@ public class ManagerPanelController : MonoBehaviour
     {
         selectedManager = manager;
         InfoText.text =
-            $"Ціна: {manager.Price}";
+            $"Ціна: {manager.Price:N0}";
     }
 
     private void OnBuyClicked()

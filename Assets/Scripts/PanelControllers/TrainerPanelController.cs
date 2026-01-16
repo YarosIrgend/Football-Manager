@@ -65,7 +65,7 @@ public class TrainerPanelController : MonoBehaviour
         Debug.Log($"Points: {selectedTrainer.Points}");
         InfoText.text =
             $"Очки: {trainer.Points}\n" +
-            $"Ціна: {trainer.Price}";
+            $"Ціна: {trainer.Price:N0}";
     }
 
     private void OnBuyClicked()

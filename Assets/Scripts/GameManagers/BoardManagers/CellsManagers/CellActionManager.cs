@@ -288,9 +288,9 @@ public class CellActionManager : MonoBehaviour
             onCompleted(true);
             yield break;
         }
-        
+
         SetTransferButtonActive();
-        
+
         bool finished = false;
 
         TransferFlowController.Instance.StartTransfer(game, player, () => finished = true);
@@ -305,7 +305,7 @@ public class CellActionManager : MonoBehaviour
     {
         var bonus = game.Bonuses.GetRandomItem();
 
-        MessagePanelController.Instance.Show($"Бонус: {bonus.Value}");
+        MessagePanelController.Instance.Show($"Бонус: {bonus.Value:N0}");
         yield return new WaitForSeconds(1.5f);
 
         Bank.AddMoney(player, bonus.Value);
@@ -321,7 +321,7 @@ public class CellActionManager : MonoBehaviour
     {
         var fine = game.Fines.GetRandomItem();
 
-        MessagePanelController.Instance.Show($"Штраф: {fine.Value}");
+        MessagePanelController.Instance.Show($"Штраф: {fine.Value:N0}");
         yield return new WaitForSeconds(1.5f);
 
         if (player.Opponent == null) // наш гравець платить
@@ -350,7 +350,7 @@ public class CellActionManager : MonoBehaviour
     {
         int tax = 1_000_000;
 
-        MessagePanelController.Instance.Show($"Податок: {tax}");
+        MessagePanelController.Instance.Show($"Податок: {tax:N0}");
         yield return new WaitForSeconds(1.5f);
 
         if (player.Opponent == null)
@@ -408,7 +408,7 @@ public class CellActionManager : MonoBehaviour
         {
             MessagePanelController.Instance.Show("У гостя нема доступних клубів для гри на виїзді");
             yield return new WaitForSeconds(1.5f);
-            MessagePanelController.Instance.Show($"Технічна поразка, оплата {MatchPaymentSum(hostClub)}");
+            MessagePanelController.Instance.Show($"Технічна поразка, оплата {MatchPaymentSum(hostClub):N0}");
             yield return new WaitForSeconds(1.5f);
 
             payment = MatchPaymentSum(hostClub);
@@ -484,13 +484,13 @@ public class CellActionManager : MonoBehaviour
         {
             winner = host;
             MessagePanelController.Instance.Show($"Переміг {hostClub.Name} ({host.ColorString}) " +
-                                                 $"із рахунком {hostPoints}:{guestPoints}\nоплата {MatchPaymentSum(hostClub)}");
+                                                 $"із рахунком {hostPoints}:{guestPoints}\nоплата {MatchPaymentSum(hostClub):N0}");
         }
         else if (hostPoints < guestPoints)
         {
             winner = guest;
             MessagePanelController.Instance.Show($"Переміг {guestClub.Name} ({guest.ColorString}) " +
-                                                 $"із рахунком {hostPoints}:{guestPoints}\nоплата {MatchPaymentSum(hostClub)}");
+                                                 $"із рахунком {hostPoints}:{guestPoints}\nоплата {MatchPaymentSum(hostClub):N0}");
         }
         else
         {
@@ -559,11 +559,11 @@ public class CellActionManager : MonoBehaviour
                 }
             }
         }
-        
+
         guestClub.IsPlayable = false;
-        
+
         MoveClubToEnd(guest, guestClub);
-        
+
         if (winner is { Opponent: null })
         {
             GameManager.MatchStatsData.matchWins++;
@@ -575,11 +575,11 @@ public class CellActionManager : MonoBehaviour
         CellManager.ShowPropertyInfoPanel(cell.CellName);
 
         CellManager.BuyingChoice.SetActive(true);
-        
+
         var text = BuyingChoice.transform.Find("Text").GetComponent<TMP_Text>();
         text.text = "Придбати?";
         text.color = Color.white;
-        
+
         // Підписуємо кнопки Так/Ні
         var buttons = CellManager.BuyingChoice.GetComponentsInChildren<UnityEngine.UI.Button>();
         foreach (var btn in buttons)
@@ -594,6 +594,7 @@ public class CellActionManager : MonoBehaviour
                 text.text = "Недостатньо коштів";
                 text.color = Color.red;
             }
+
             BuyChoice = true;
             CellManager.BuyingChoice.SetActive(false);
             CellManager.ClosePropertyInfoPanel();
@@ -651,7 +652,7 @@ public class CellActionManager : MonoBehaviour
         var transferButton = GameObject.Find("Canvas/TransferFlowController/TransferButton");
         transferButton.SetActive(active);
     }
-    
+
     private void MoveClubToEnd(Player player, Club club)
     {
         if (club == null)

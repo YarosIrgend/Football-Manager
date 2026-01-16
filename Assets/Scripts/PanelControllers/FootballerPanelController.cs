@@ -71,7 +71,7 @@ public class FootballerPanelController : MonoBehaviour
         Debug.Log($"Points: {selectedFootballer.Points}");
         InfoText.text =
             $"Очки: {footballer.Points}\n" +
-            $"Ціна: {footballer.Price}";
+            $"Ціна: {footballer.Price:N0}";
     }
 
     private void OnBuyClicked()
