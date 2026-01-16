@@ -484,13 +484,13 @@ public class CellActionManager : MonoBehaviour
         {
             winner = host;
             MessagePanelController.Instance.Show($"Переміг {hostClub.Name} ({host.ColorString}) " +
-                                                 $"із рахунком {hostPoints}:{guestPoints}");
+                                                 $"із рахунком {hostPoints}:{guestPoints}\nоплата {MatchPaymentSum(hostClub)}");
         }
         else if (hostPoints < guestPoints)
         {
             winner = guest;
             MessagePanelController.Instance.Show($"Переміг {guestClub.Name} ({guest.ColorString}) " +
-                                                 $"із рахунком {hostPoints}:{guestPoints}");
+                                                 $"із рахунком {hostPoints}:{guestPoints}\nоплата {MatchPaymentSum(hostClub)}");
         }
         else
         {
