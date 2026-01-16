@@ -87,6 +87,7 @@ public class CellActionManager : MonoBehaviour
         {
             if (owner == player)
             {
+                onCompleted(true);
                 yield break;
             }
 
@@ -172,6 +173,7 @@ public class CellActionManager : MonoBehaviour
         {
             if (owner == player)
             {
+                onCompleted(true);
                 yield break;
             }
 
