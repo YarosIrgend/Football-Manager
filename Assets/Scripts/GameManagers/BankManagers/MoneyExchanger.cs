@@ -75,10 +75,8 @@ public class MoneyExchanger : MonoBehaviour
 
     private void UpdateGivenMoneySum()
     {
-        NumberFormatInfo nfi = new CultureInfo("en-US", false).NumberFormat;
-        nfi.NumberGroupSeparator = " ";
         var sum = BankMoneyPanel.transform.Find("Sum").GetComponent<TextMeshProUGUI>();
-        sum.text = $"Дано: {GivenMoney.ToString("N", nfi)}";
+        sum.text = $"Дано: {GivenMoney:N0}";
     }
     
     public void OnMouseDown()

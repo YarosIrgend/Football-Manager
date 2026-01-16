@@ -1,4 +1,3 @@
-using System.Globalization;
 using TMPro;
 using UnityEngine;
 
@@ -27,9 +26,7 @@ public class MoneyPanelController : MonoBehaviour
 
     private static void ShowMoneySum(Player player)
     {
-        NumberFormatInfo nfi = new CultureInfo("en-US", false).NumberFormat;
-        nfi.NumberGroupSeparator = " ";
         var moneySumText = GameObject.Find("Sum").GetComponent<TextMeshProUGUI>();
-        moneySumText.text = $"Сума: {player.MoneySum.ToString("N", nfi)}";
+        moneySumText.text = $"Сума: {player.MoneySum:N0}";
     }
 }

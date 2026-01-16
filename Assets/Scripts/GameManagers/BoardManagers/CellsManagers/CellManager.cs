@@ -72,14 +72,14 @@ public class CellManager : MonoBehaviour
         Transform propertyInfo = PropertyInfoPanel.transform.Find("PropertyInfo");
 
         CreateRow(propertyInfo, $"Назва:   {property.Name}");
-        CreateRow(propertyInfo, $"Ціна:   {property.Price}");
-        CreateRow(propertyInfo, $"Ціна закладення:   {property.Price / 2}");
+        CreateRow(propertyInfo, $"Ціна:   {property.Price:N0}");
+        CreateRow(propertyInfo, $"Ціна закладення:   {property.Price / 2:N0}");
 
         if (property is Club club)
         {
-            CreateRow(propertyInfo, $"Дохід з гравцем:   {club.IncomeWithPlayer}");
-            CreateRow(propertyInfo, $"Дохід з тренером:   {club.IncomeWithTrainer}");
-            CreateRow(propertyInfo, $"Дохід з менеджером:   {club.IncomeWithManager}");
+            CreateRow(propertyInfo, $"Дохід з гравцем:   {club.IncomeWithPlayer:N0}");
+            CreateRow(propertyInfo, $"Дохід з тренером:   {club.IncomeWithTrainer:N0}");
+            CreateRow(propertyInfo, $"Дохід з менеджером:   {club.IncomeWithManager:N0}");
         }
     }
 

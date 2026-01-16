@@ -75,18 +75,14 @@ public class MoneyPayer : MonoBehaviour
 
     private void UpdateGivenMoneySum()
     {
-        NumberFormatInfo nfi = new CultureInfo("en-US", false).NumberFormat;
-        nfi.NumberGroupSeparator = " ";
         var sum = BankMoneyPanel.transform.Find("Sum").GetComponent<TextMeshProUGUI>();
-        sum.text = $"Потрібно: {RequiredMoney.ToString("N", nfi)}";
+        sum.text = $"Потрібно: {RequiredMoney:N0}";
     }
 
     private void ShowMoneySum()
     {
-        NumberFormatInfo nfi = new CultureInfo("en-US", false).NumberFormat;
-        nfi.NumberGroupSeparator = " ";
         var moneySumText = GameObject.Find("Sum").GetComponent<TextMeshProUGUI>();
-        moneySumText.text = $"Сума: {Player.MoneySum.ToString("N", nfi)}";
+        moneySumText.text = $"Сума: {Player.MoneySum:N0}";
     }
 
     public void OnMouseDown()

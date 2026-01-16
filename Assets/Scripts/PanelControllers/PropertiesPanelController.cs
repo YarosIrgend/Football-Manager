@@ -253,18 +253,16 @@ public class PropertiesPanelController : MonoBehaviour
             RedeemPropertyButton.gameObject.SetActive(false);
         }
 
-        NumberFormatInfo nfi = new CultureInfo("en-US", false).NumberFormat;
-        nfi.NumberGroupSeparator = " ";
 
         Transform clubInfo = ClubInfoPanel.transform.Find("ClubInfo");
 
         CreateRow("NameRow", clubInfo, $"Назва:   {club.Name}");
-        CreateRow("PriceRow", clubInfo, $"Ціна:   {club.Price.ToString("N", nfi)}");
-        CreateRow("MortgagePriceRow", clubInfo, $"Ціна закладення:   {(club.Price / 2).ToString("N", nfi)}");
-        CreateRow("IncomeWithPlayerRow", clubInfo, $"Дохід з гравцем:   {club.IncomeWithPlayer.ToString("N", nfi)}");
-        CreateRow("IncomeWithTrainerRow", clubInfo, $"Дохід з тренером:   {club.IncomeWithTrainer.ToString("N", nfi)}");
+        CreateRow("PriceRow", clubInfo, $"Ціна:   {club.Price:N0}");
+        CreateRow("MortgagePriceRow", clubInfo, $"Ціна закладення:   {club.Price / 2:N0}");
+        CreateRow("IncomeWithPlayerRow", clubInfo, $"Дохід з гравцем:   {club.IncomeWithPlayer:N0}");
+        CreateRow("IncomeWithTrainerRow", clubInfo, $"Дохід з тренером:   {club.IncomeWithTrainer:N0}");
         CreateRow("IncomeWithManagerRow", clubInfo,
-            $"Дохід з менеджером:   {club.IncomeWithManager.ToString("N", nfi)}");
+            $"Дохід з менеджером:   {club.IncomeWithManager:N0}");
 
         CreateRow(
             "FootballerRow",
@@ -356,15 +354,13 @@ public class PropertiesPanelController : MonoBehaviour
 
     private void SetClubDataForTransfer(Club club)
     {
-        NumberFormatInfo nfi = new CultureInfo("en-US", false).NumberFormat;
-        nfi.NumberGroupSeparator = " ";
         Transform clubInfo = ClubInfoPanelForTransfer.transform.Find("ClubInfo");
 
         CreateRow("NameRow", clubInfo, $"Назва:   {club.Name}");
-        CreateRow("PriceRow", clubInfo, $"Ціна:   {club.Price.ToString("N", nfi)}");
-        CreateRow("IncomeWithPlayerRow", clubInfo, $"Дохід з гравцем:   {club.IncomeWithPlayer.ToString("N", nfi)}");
-        CreateRow("IncomeWithTrainerRow", clubInfo, $"Дохід з тренером:   {club.IncomeWithTrainer.ToString("N", nfi)}");
-        CreateRow("IncomeWithManagerRow", clubInfo, $"Дохід з менеджером:   {club.IncomeWithManager.ToString("N", nfi)}");
+        CreateRow("PriceRow", clubInfo, $"Ціна:   {club.Price:N0}");
+        CreateRow("IncomeWithPlayerRow", clubInfo, $"Дохід з гравцем:   {club.IncomeWithPlayer:N0}");
+        CreateRow("IncomeWithTrainerRow", clubInfo, $"Дохід з тренером:   {club.IncomeWithTrainer:N0}");
+        CreateRow("IncomeWithManagerRow", clubInfo, $"Дохід з менеджером:   {club.IncomeWithManager:N0}");
 
         CreateRow(
             "FootballerRow",
@@ -555,8 +551,8 @@ public class PropertiesPanelController : MonoBehaviour
         Transform telecompanyInfo = ClubInfoPanel.transform.Find("ClubInfo");
 
         CreateRow("NameRow", telecompanyInfo, $"Назва:   {telecompany.Name}");
-        CreateRow("PriceRow", telecompanyInfo, $"Ціна:   {telecompany.Price}");
-        CreateRow("MortgagePriceRow", telecompanyInfo, $"Ціна закладення:   {telecompany.Price / 2}");
+        CreateRow("PriceRow", telecompanyInfo, $"Ціна:   {telecompany.Price:N0}");
+        CreateRow("MortgagePriceRow", telecompanyInfo, $"Ціна закладення:   {telecompany.Price / 2:N0}");
         CreateRow("IsMortgagedRow", telecompanyInfo, $"Закладений: {(telecompany.IsMortgaged ? "ТАК" : "НІ")}");
     }
 
