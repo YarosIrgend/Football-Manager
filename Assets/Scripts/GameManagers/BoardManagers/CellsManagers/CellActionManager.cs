@@ -474,7 +474,7 @@ public class CellActionManager : MonoBehaviour
         MessagePanelController.Instance.Show($"Хід {hostClub.Name} ({host.ColorString})");
         yield return new WaitForSeconds(GameManager.messageDelaySeconds);
 
-        int hostPoints = GameManager.ThrowDices();
+        int hostPoints = TurnHandler.ThrowDices();
         MessagePanelController.Instance.Show($"Випало: {hostPoints}");
         yield return new WaitForSeconds(GameManager.messageDelaySeconds);
 
@@ -492,7 +492,7 @@ public class CellActionManager : MonoBehaviour
         // хід гостя
         MessagePanelController.Instance.Show($"Хід {guestClub.Name} ({guest.ColorString})");
         yield return new WaitForSeconds(GameManager.messageDelaySeconds);
-        int guestPoints = GameManager.ThrowDices();
+        int guestPoints = TurnHandler.ThrowDices();
         MessagePanelController.Instance.Show($"Випало: {guestPoints}");
         yield return new WaitForSeconds(GameManager.messageDelaySeconds);
 

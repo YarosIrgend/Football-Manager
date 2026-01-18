@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using TMPro;
@@ -22,7 +21,7 @@ public class GameManager : MonoBehaviour
 
     public Player CurrentPlayer; // поточний гравець, який ходить
     public int CurrentPlayerIndex; // індекс поточного гравця
-    private bool AreTurnConditionsCompleted; // закінчити хід можна лише після виконання умов (оплати)
+    public bool AreTurnConditionsCompleted; // закінчити хід можна лише після виконання умов (оплати)
 
     [Header("Buttons")] public GameObject MakeTurnButton;
     public GameObject EndTurnButton;
@@ -42,6 +41,7 @@ public class GameManager : MonoBehaviour
     {
         //Game.GameSettings = MatchSettingsController.GameSettings;
         Game.GameSettings = new GameSettings { Difficulty = Difficulty.Easy, PlayerCount = 2, ChipColor = Color.blue };
+        TurnHandler.gameManager = this;
         BoardManager.GenerateSnapPoints();
         InitializeGame();
         PropertyManager.SetPlayers(Game.Players);
@@ -128,158 +128,9 @@ public class GameManager : MonoBehaviour
 
     #endregion
 
-    # region TurnHandler
-
-    public static int ThrowDices()
-    {
-        return Random.Range(2, 13);
-    }
-
-    public void TurnPlayer()
-    {
-        StartCoroutine(TurnPlayerCoroutine());
-    }
-
-    public IEnumerator TurnPlayerCoroutine()
-    {
-        MakeTurnButton.SetActive(false);
-
-        // наш гравець пропускає хід
-        if (!CurrentPlayer.IsPlayable)
-        {
-            MessagePanelController.Instance.Show("Ви пропускаєте хід");
-            yield return new WaitForSeconds(messageDelaySeconds);
-
-            CurrentPlayer.IsPlayable = true;
-
-            SetNextPlayer();
-            StartCoroutine(OpponentsTurnsCoroutine());
-            yield break;
-        }
-
-        //var cells = 2;
-        var cells = ThrowDices();
-        MessagePanelController.Instance.Show($"Випало: {cells}");
-        yield return new WaitForSeconds(messageDelaySeconds);
-
-        EndTurnButton.SetActive(true);
-        yield return StartCoroutine(MovePlayerChipCoroutine(cells));
-    }
-
-    public void EndPlayerTurn()
-    {
-        if (!AreTurnConditionsCompleted)
-        {
-            MoneyPayer.ConditionsWarningPanel.SetActive(true);
-            return;
-        }
-        
-        if (StatsManager.GetStat("maxBudget") <= CurrentPlayer.MoneySum)
-            StatsManager.AddToStat("maxBudget", CurrentPlayer.MoneySum);
-            
-        // якщо була купівля клубу або телекомпанії
-        if (CellActionManager.PendingPurchase != null)
-        {
-            var property = CellActionManager.PendingPurchase;
-
-            switch (property)
-            {
-                case Club club:
-                    CurrentPlayer.Clubs.Add(club);
-                    break;
-                case Telecompany tele:
-                    CurrentPlayer.Telecompanies.Add(tele);
-                    break;
-            }
-
-            CellActionManager.PendingPurchase = null; // очищаємо після покупки
-        }
-
-        EndTurnButton.SetActive(false);
-        MoneyPayer.gameObject.SetActive(false);
-        SetNextPlayer();
-        StartCoroutine(OpponentsTurnsCoroutine()); // здійснення ходів противника
-    }
-
-    private IEnumerator OpponentsTurnsCoroutine()
-    {
-        while (CurrentPlayerIndex != 0)
-        {
-            MessagePanelController.Instance.Show($"Хід наступного противника: {CurrentPlayer.ColorString}");
-            yield return new WaitForSeconds(messageDelaySeconds);
-
-            if (!CurrentPlayer.IsPlayable)
-            {
-                MessagePanelController.Instance.Show($"{CurrentPlayer.ColorString} пропускає хід");
-                yield return new WaitForSeconds(messageDelaySeconds);
-                CurrentPlayer.IsPlayable = true;
-                SetNextPlayer();
-                MessagePanelController.Instance.Show($"Хід наступного противника: {CurrentPlayer.ColorString}");
-                yield return new WaitForSeconds(messageDelaySeconds);
-            }
-
-            yield return StartCoroutine(OpponentTurnCoroutine());
-            RemoveBankrupts();
-        }
-
-        MakeTurnButton.SetActive(true);
-    }
-
-    private IEnumerator OpponentTurnCoroutine()
-    {
-        //var cells = 4;
-        var cells = ThrowDices();
-
-        MessagePanelController.Instance.Show($"Випало: {cells}");
-        yield return new WaitForSeconds(messageDelaySeconds);
-
-        yield return StartCoroutine(MovePlayerChipCoroutine(cells));
-
-        SetNextPlayer();
-    }
-
-    // переключення ходу на наступного гравця
-    private void SetNextPlayer()
-    {
-        if (++CurrentPlayerIndex >= Game.Players.Count)
-        {
-            CurrentPlayerIndex = 0;
-        }
-
-        CurrentPlayer = Game.Players[CurrentPlayerIndex];
-    }
-
-    // перевірка чи пройшли поле старт, щоб дати бабло
-    private bool StartCellPassed(Cell currentCell, Cell newCell)
-    {
-        return currentCell.Index >= newCell.Index;
-    }
-
-    private IEnumerator MovePlayerChipCoroutine(int cells)
-    {
-        var currentCell = CurrentPlayer.ChipBehaviour.CurrentCell;
-
-        BoardManager.MovePlayerChip(CurrentPlayer.ChipBehaviour, cells);
-        var newCell = CurrentPlayer.ChipBehaviour.CurrentCell;
-
-        // старт
-        if (StartCellPassed(currentCell, newCell))
-        {
-            Bank.AddMoney(CurrentPlayer, 500_000);
-        }
-
-        // дія клітинки
-        yield return StartCoroutine(
-            CellActionManager.DoActionAccordingCellCoroutine(
-                Game,
-                newCell,
-                CurrentPlayer,
-                completed => AreTurnConditionsCompleted = completed
-            )
-        );
-    }
-
-    private void RemoveBankrupts()
+    #region ManageMethods
+    
+    public void RemoveBankrupts()
     {
         var bankrupts = Game.Players
             .Where(player => player.IsBankrupt)

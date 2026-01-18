@@ -1,126 +1,151 @@
-﻿// Потім використаємо якось
+﻿using UnityEngine;
+using System.Collections;
 
-// using System.Collections;
-// using UnityEngine;
-//
-// public class TurnHandler : MonoBehaviour
-// {
-//     [Header("Dependencies")]
-//     public Game Game;
-//     public BoardManager BoardManager;
-//     public CellActionManager CellActionManager;
-//     public GameManager GameManager;
-//     
-//     [Header("UI")]
-//     public GameObject MakeTurnButton;
-//     public GameObject EndTurnButton;
-//     public GameObject MessagePanel;
-//
-//     public Player CurrentPlayer;
-//     public int CurrentPlayerIndex;
-//
-//     #region Init
-//
-//     public void Initialize(Game game)
-//     {
-//         Game = game;
-//         CurrentPlayerIndex = 0;
-//         CurrentPlayer = Game.Players[CurrentPlayerIndex];
-//         MakeTurnButton.SetActive(true);
-//         EndTurnButton.SetActive(false);
-//     }
-//
-//     #endregion
-//
-//     #region Turn flow
-//
-//     public void TurnPlayer()
-//     {
-//         MakeTurnButton.SetActive(false);
-//         MovePlayerChip();
-//         SetNextPlayer();
-//         EndTurnButton.SetActive(true);
-//     }
-//
-//     public void EndPlayerTurn()
-//     {
-//         EndTurnButton.SetActive(false);
-//         StartCoroutine(OpponentsTurnsCoroutine());
-//     }
-//
-//     #endregion
-//
-//     #region Core logic
-//
-//     private int ThrowDices()
-//     {
-//         return Random.Range(2, 13);
-//     }
-//
-//     private void SetNextPlayer()
-//     {
-//         CurrentPlayerIndex++;
-//
-//         if (CurrentPlayerIndex >= Game.Players.Count)
-//             CurrentPlayerIndex = 0;
-//
-//         CurrentPlayer = Game.Players[CurrentPlayerIndex];
-//     }
-//
-//     private bool StartCellPassed(Cell currentCell, Cell newCell)
-//     {
-//         return currentCell.Index >= newCell.Index;
-//     }
-//
-//     private void MovePlayerChip()
-//     {
-//         int cellsToPass = ThrowDices();
-//         var currentCell = CurrentPlayer.ChipBehaviour.CurrentCell;
-//
-//         GameManager.ShowInfoPanel($"Випало: {cellsToPass}");
-//
-//         BoardManager.MovePlayerChip(CurrentPlayer.ChipBehaviour, cellsToPass);
-//
-//         var newCell = CurrentPlayer.ChipBehaviour.CurrentCell;
-//         CellActionManager.DoActionAccordingCell(newCell, CurrentPlayer);
-//
-//         if (StartCellPassed(currentCell, newCell))
-//         {
-//             CellActionManager.Bank.AddMoney(CurrentPlayer, 500_000);
-//         }
-//     }
-//
-//     #endregion
-//
-//     #region Opponents
-//
-//     private IEnumerator OpponentsTurnsCoroutine()
-//     {
-//         while (CurrentPlayerIndex != 0)
-//         {
-//             GameManager.ShowInfoPanel("Хід наступного противника");
-//             yield return new WaitForSeconds(1f);
-//             GameManager.CloseMessagePanel();
-//
-//             yield return StartCoroutine(OpponentTurnCoroutine());
-//         }
-//
-//         MakeTurnButton.SetActive(true);
-//     }
-//
-//     private IEnumerator OpponentTurnCoroutine()
-//     {
-//         yield return new WaitForSeconds(0.5f);
-//
-//         int cells = ThrowDices();
-//         GameManager.ShowInfoPanel($"Випало: {cells}");
-//         yield return new WaitForSeconds(1f);
-//
-//         MovePlayerChip();
-//         GameManager.CloseMessagePanel();
-//         SetNextPlayer();
-//     }
-//
-//     #endregion
-//     
-// }
+public class TurnHandler : MonoBehaviour
+{
+    public static GameManager gameManager;
+
+    public static int ThrowDices()
+    {
+        return Random.Range(2, 13);
+    }
+
+    public void StartPlayerTurn()
+    {
+        gameManager.StartCoroutine(PlayerTurnCoroutine());
+    }
+
+    private IEnumerator PlayerTurnCoroutine()
+    {
+        gameManager.MakeTurnButton.SetActive(false);
+
+        var currentPlayer = gameManager.CurrentPlayer;
+
+        // Пропуск ходу
+        if (!currentPlayer.IsPlayable)
+        {
+            MessagePanelController.Instance.Show("Ви пропускаєте хід");
+            yield return new WaitForSeconds(GameManager.messageDelaySeconds);
+
+            currentPlayer.IsPlayable = true;
+            SetNextPlayer();
+            gameManager.StartCoroutine(OpponentsTurnsCoroutine());
+            yield break;
+        }
+
+        int cells = ThrowDices();
+        MessagePanelController.Instance.Show($"Випало: {cells}");
+        yield return new WaitForSeconds(GameManager.messageDelaySeconds);
+
+        gameManager.EndTurnButton.SetActive(true);
+        yield return gameManager.StartCoroutine(MovePlayerChipCoroutine(cells));
+    }
+
+    public void EndPlayerTurn()
+    {
+        if (!gameManager.AreTurnConditionsCompleted)
+        {
+            gameManager.MoneyPayer.ConditionsWarningPanel.SetActive(true);
+            return;
+        }
+
+        ProcessPendingPurchase();
+
+        gameManager.EndTurnButton.SetActive(false);
+        gameManager.MoneyPayer.gameObject.SetActive(false);
+
+        SetNextPlayer();
+        gameManager.StartCoroutine(OpponentsTurnsCoroutine());
+    }
+
+    private IEnumerator OpponentsTurnsCoroutine()
+    {
+        while (gameManager.CurrentPlayerIndex != 0)
+        {
+            var player = gameManager.CurrentPlayer;
+
+            MessagePanelController.Instance
+                .Show($"Хід наступного противника: {player.ColorString}");
+
+            yield return new WaitForSeconds(GameManager.messageDelaySeconds);
+
+            if (!player.IsPlayable)
+            {
+                MessagePanelController.Instance
+                    .Show($"{player.ColorString} пропускає хід");
+
+                yield return new WaitForSeconds(GameManager.messageDelaySeconds);
+                player.IsPlayable = true;
+                SetNextPlayer();
+                continue;
+            }
+
+            yield return OpponentTurnCoroutine();
+            gameManager.RemoveBankrupts();
+        }
+
+        gameManager.MakeTurnButton.SetActive(true);
+    }
+
+    private IEnumerator OpponentTurnCoroutine()
+    {
+        int cells = ThrowDices();
+
+        MessagePanelController.Instance.Show($"Випало: {cells}");
+        yield return new WaitForSeconds(GameManager.messageDelaySeconds);
+
+        yield return gameManager.StartCoroutine(MovePlayerChipCoroutine(cells));
+        SetNextPlayer();
+    }
+
+    private IEnumerator MovePlayerChipCoroutine(int cells)
+    {
+        var player = gameManager.CurrentPlayer;
+        var currentCell = player.ChipBehaviour.CurrentCell;
+
+        gameManager.BoardManager.MovePlayerChip(player.ChipBehaviour, cells);
+
+        var newCell = player.ChipBehaviour.CurrentCell;
+
+        if (currentCell.Index >= newCell.Index)
+        {
+            gameManager.Bank.AddMoney(player, 500_000);
+        }
+
+        yield return gameManager.StartCoroutine(
+            gameManager.CellActionManager.DoActionAccordingCellCoroutine(
+                gameManager.Game,
+                newCell,
+                player,
+                completed => gameManager.AreTurnConditionsCompleted = completed
+            )
+        );
+    }
+
+    private void SetNextPlayer()
+    {
+        if (++gameManager.CurrentPlayerIndex >= gameManager.Game.Players.Count)
+            gameManager.CurrentPlayerIndex = 0;
+
+        gameManager.CurrentPlayer =
+            gameManager.Game.Players[gameManager.CurrentPlayerIndex];
+    }
+
+    private void ProcessPendingPurchase()
+    {
+        var pending = gameManager.CellActionManager.PendingPurchase;
+        if (pending == null) return;
+
+        switch (pending)
+        {
+            case Club club:
+                gameManager.CurrentPlayer.Clubs.Add(club);
+                break;
+            case Telecompany tele:
+                gameManager.CurrentPlayer.Telecompanies.Add(tele);
+                break;
+        }
+
+        gameManager.CellActionManager.PendingPurchase = null;
+    }
+}
